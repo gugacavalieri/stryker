@@ -4,12 +4,12 @@ import { factory, testInjector } from '@stryker-mutator/test-helpers';
 import { ALL_REPORTER_EVENTS, scoreResult } from '@stryker-mutator/test-helpers/src/factory';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import { coreTokens } from '../../../src/di';
 import { PluginCreator } from '../../../src/di/PluginCreator';
 import BroadcastReporter from '../../../src/reporters/BroadcastReporter';
 
 describe('BroadcastReporter', () => {
-
   let sut: BroadcastReporter;
   let rep1: sinon.SinonStubbedInstance<Required<Reporter>>;
   let rep2: sinon.SinonStubbedInstance<Required<Reporter>>;
@@ -23,8 +23,10 @@ describe('BroadcastReporter', () => {
     rep2 = factory.reporter('rep2');
     pluginCreatorMock = sinon.createStubInstance(PluginCreator);
     pluginCreatorMock.create
-      .withArgs('rep1').returns(rep1)
-      .withArgs('rep2').returns(rep2);
+      .withArgs('rep1')
+      .returns(rep1)
+      .withArgs('rep2')
+      .returns(rep2);
   });
 
   afterEach(() => {
@@ -89,11 +91,13 @@ describe('BroadcastReporter', () => {
 
       beforeEach(() => {
         isResolved = false;
-        rep1.wrapUp.returns(new Promise<void>((resolve, reject) => {
-          wrapUpResolveFn = resolve;
-          wrapUpRejectFn = reject;
-        }));
-        rep2.wrapUp.returns(new Promise<void>(resolve => wrapUpResolveFn2 = resolve));
+        rep1.wrapUp.returns(
+          new Promise<void>((resolve, reject) => {
+            wrapUpResolveFn = resolve;
+            wrapUpRejectFn = reject;
+          })
+        );
+        rep2.wrapUp.returns(new Promise<void>(resolve => (wrapUpResolveFn2 = resolve)));
         result = sut.wrapUp().then(() => void (isResolved = true));
       });
 
@@ -116,7 +120,7 @@ describe('BroadcastReporter', () => {
         it('should not result in a rejection', () => result);
 
         it('should log the error', () => {
-          expect(testInjector.logger.error).calledWith(`An error occurred during 'wrapUp' on reporter 'rep1'.`, actualError);
+          expect(testInjector.logger.error).calledWith("An error occurred during 'wrapUp' on reporter 'rep1'.", actualError);
         });
       });
     });
@@ -147,12 +151,14 @@ describe('BroadcastReporter', () => {
       });
 
       it('should log a warning for reporters that implement the onScoreCalculated event', () => {
-        rep1.onScoreCalculated.returns(() => { });
+        rep1.onScoreCalculated.returns(() => {});
         (rep2 as any).onScoreCalculated = undefined;
 
         sut.onScoreCalculated(scoreResult());
 
-        expect(testInjector.logger.warn).to.have.been.calledWith(`DEPRECATED: The reporter 'rep1' uses 'onScoreCalculated' which is deprecated. Please use 'onMutationTestReportReady' and calculate the score as an alternative.`);
+        expect(testInjector.logger.warn).to.have.been.calledWith(
+          "DEPRECATED: The reporter 'rep1' uses 'onScoreCalculated' which is deprecated. Please use 'onMutationTestReportReady' and calculate the score as an alternative."
+        );
         expect(testInjector.logger.warn).to.not.have.been.calledWithMatch('rep2');
       });
     });
@@ -160,7 +166,7 @@ describe('BroadcastReporter', () => {
 
   function createSut() {
     return testInjector.injector
-      .provideValue(coreTokens.pluginCreatorReporter, pluginCreatorMock as unknown as PluginCreator<PluginKind.Reporter>)
+      .provideValue(coreTokens.pluginCreatorReporter, (pluginCreatorMock as unknown) as PluginCreator<PluginKind.Reporter>)
       .injectClass(BroadcastReporter);
   }
 

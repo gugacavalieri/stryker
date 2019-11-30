@@ -1,10 +1,12 @@
+import * as childProcess from 'child_process';
+import * as os from 'os';
+
 import { Config } from '@stryker-mutator/api/config';
 import { RunResult, RunStatus, TestStatus } from '@stryker-mutator/api/test_runner';
 import { errorToString } from '@stryker-mutator/util';
 import { expect } from 'chai';
-import * as childProcess from 'child_process';
-import * as os from 'os';
 import * as sinon from 'sinon';
+
 import CommandTestRunner, { CommandRunnerSettings } from '../../../src/test-runner/CommandTestRunner';
 import * as objectUtils from '../../../src/utils/objectUtils';
 import Timer, * as timerModule from '../../../src/utils/Timer';
@@ -12,7 +14,6 @@ import ChildProcessMock from '../../helpers/ChildProcessMock';
 import { Mock, mock } from '../../helpers/producers';
 
 describe(CommandTestRunner.name, () => {
-
   let childProcessMock: ChildProcessMock;
   let killStub: sinon.SinonStub;
   let timerMock: Mock<Timer>;
@@ -41,9 +42,7 @@ describe(CommandTestRunner.name, () => {
       const result = await actRun();
       const expectedResult: RunResult = {
         status: RunStatus.Complete,
-        tests: [
-          { name: 'All tests', status: TestStatus.Success, timeSpentMs: 42 }
-        ]
+        tests: [{ name: 'All tests', status: TestStatus.Success, timeSpentMs: 42 }]
       };
       expect(result).deep.eq(expectedResult);
     });
@@ -59,9 +58,7 @@ describe(CommandTestRunner.name, () => {
       const result = await resultPromise;
       const expectedResult: RunResult = {
         status: RunStatus.Complete,
-        tests: [
-          { name: 'All tests', status: TestStatus.Failed, timeSpentMs: 42, failureMessages: [`x Test 1 failed${os.EOL}1 != 2`] }
-        ]
+        tests: [{ name: 'All tests', status: TestStatus.Failed, timeSpentMs: 42, failureMessages: [`x Test 1 failed${os.EOL}1 != 2`] }]
       };
       expect(result).deep.eq(expectedResult);
     });
@@ -92,7 +89,6 @@ describe(CommandTestRunner.name, () => {
   });
 
   describe('dispose', () => {
-
     it('should kill any running process', async () => {
       killStub.resolves();
       const sut = createSut();
@@ -137,5 +133,4 @@ describe(CommandTestRunner.name, () => {
   function tick(): Promise<void> {
     return new Promise(res => setTimeout(res, 0));
   }
-
 });

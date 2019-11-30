@@ -1,9 +1,9 @@
 import { expect } from 'chai';
+
 import ExpectMutation from './ExpectMutation';
 
 export default function ArrowFunctionMutatorSpec(name: string, expectMutation: ExpectMutation) {
   describe('ArrowFunctionMutator', () => {
-
     it('should have name "ArrowFunction"', () => {
       expect(name).eq('ArrowFunction');
     });

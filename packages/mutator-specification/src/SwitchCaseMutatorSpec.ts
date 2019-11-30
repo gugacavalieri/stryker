@@ -1,11 +1,13 @@
 import { expect } from 'chai';
+
 import ExpectMutation from './ExpectMutation';
 
-export default function SwitchCaseMutatorSpec(
-  name: string,
-  expectMutation: ExpectMutation
-) {
+export default function SwitchCaseMutatorSpec(name: string, expectMutation: ExpectMutation) {
   describe('SwitchCaseMutator', () => {
+    beforeEach(() => {
+      console.warn('DEPRECATED: please migrate from the SwitchCaseMutatorSpec to the ConditionalExpressionMutatorSpec');
+    });
+
     it('should have name "SwitchCase"', () => {
       expect(name).eq('SwitchCase');
     });

@@ -1,3 +1,5 @@
+import * as os from 'os';
+
 import { File, LogLevel } from '@stryker-mutator/api/core';
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { MutantResult } from '@stryker-mutator/api/report';
@@ -6,10 +8,10 @@ import { RunStatus } from '@stryker-mutator/api/test_runner';
 import { factory, testInjector } from '@stryker-mutator/test-helpers';
 import { file, testFramework } from '@stryker-mutator/test-helpers/src/factory';
 import { expect } from 'chai';
-import * as os from 'os';
 import { from } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import * as sinon from 'sinon';
+
 import { coreTokens } from '../../src/di';
 import LoggingClientContext from '../../src/logging/LoggingClientContext';
 import { InitialTestRunResult } from '../../src/process/InitialTestExecutor';
@@ -49,10 +51,13 @@ describe(SandboxPool.name, () => {
     genericSandboxForAllSubsequentCallsToNewSandbox.runMutant.resolves(factory.runResult());
     secondSandbox.runMutant.resolves(factory.runResult());
     inputMutants = [transpiledMutant()];
-    createStub = sinon.stub(Sandbox, 'create')
+    createStub = sinon
+      .stub(Sandbox, 'create')
       .resolves(genericSandboxForAllSubsequentCallsToNewSandbox)
-      .onCall(0).resolves(firstSandbox)
-      .onCall(1).resolves(secondSandbox);
+      .onCall(0)
+      .resolves(firstSandbox)
+      .onCall(1)
+      .resolves(secondSandbox);
 
     initialTranspiledFiles = [file()];
   });
@@ -72,7 +77,7 @@ describe(SandboxPool.name, () => {
 
     return testInjector.injector
       .provideValue(commonTokens.logger, factory.logger())
-      .provideValue(coreTokens.testFramework, expectedTestFramework as unknown as TestFramework)
+      .provideValue(coreTokens.testFramework, (expectedTestFramework as unknown) as TestFramework)
       .provideValue(coreTokens.initialRunResult, initialRunResult)
       .provideValue(coreTokens.loggingContext, LOGGING_CONTEXT)
       .provideValue(coreTokens.transpiledFiles, initialTranspiledFiles)
@@ -81,13 +86,13 @@ describe(SandboxPool.name, () => {
   }
 
   function actRunMutants() {
-    return sut.runMutants(from(inputMutants))
+    return sut
+      .runMutants(from(inputMutants))
       .pipe(toArray())
       .toPromise();
   }
 
   describe('runMutants', () => {
-
     it('should use maxConcurrentTestRunners when set', async () => {
       testInjector.options.maxConcurrentTestRunners = 1;
       sut = createSut();
@@ -133,9 +138,12 @@ describe(SandboxPool.name, () => {
       const secondMutantTask = new Task<MutantResult>();
       createStub.reset();
       createStub
-        .onFirstCall().returns(createFirstSandboxTask.promise)
-        .onSecondCall().returns(createSecondSandboxTask.promise)
-        .onThirdCall().returns(createThirdSandboxTask.promise);
+        .onFirstCall()
+        .returns(createFirstSandboxTask.promise)
+        .onSecondCall()
+        .returns(createSecondSandboxTask.promise)
+        .onThirdCall()
+        .returns(createThirdSandboxTask.promise);
       firstSandbox.runMutant.reset();
       firstSandbox.runMutant.returns(firstRunMutantTask.promise);
       secondSandbox.runMutant.reset();
@@ -155,8 +163,8 @@ describe(SandboxPool.name, () => {
       expect(createStub).callCount(2);
 
       // Act
-      createFirstSandboxTask.resolve(firstSandbox as unknown as Sandbox);
-      createThirdSandboxTask.resolve(genericSandboxForAllSubsequentCallsToNewSandbox as unknown as Sandbox);
+      createFirstSandboxTask.resolve((firstSandbox as unknown) as Sandbox);
+      createThirdSandboxTask.resolve((genericSandboxForAllSubsequentCallsToNewSandbox as unknown) as Sandbox);
       await secondResultTask.promise;
       expect(createStub).callCount(3);
       firstRunMutantTask.resolve(factory.mutantResult());
@@ -178,7 +186,7 @@ describe(SandboxPool.name, () => {
       expect(Sandbox.create).to.have.callCount(1);
     });
 
-    it('should reject when a sandbox couldn\'t be created', async () => {
+    it("should reject when a sandbox couldn't be created", async () => {
       createStub.reset();
       const expectedError = new Error('foo error');
       createStub.rejects(expectedError);
@@ -211,17 +219,20 @@ describe(SandboxPool.name, () => {
       const task2 = new Task<Sandbox>();
       createStub.reset();
       createStub
-        .onCall(0).returns(task.promise)
-        .onCall(1).returns(task2.promise)
-        .onCall(2).resolves(genericSandboxForAllSubsequentCallsToNewSandbox); // promise is not yet resolved
+        .onCall(0)
+        .returns(task.promise)
+        .onCall(1)
+        .returns(task2.promise)
+        .onCall(2)
+        .resolves(genericSandboxForAllSubsequentCallsToNewSandbox); // promise is not yet resolved
       inputMutants.push(transpiledMutant());
 
       // Act
       const runPromise = sut.runMutants(from(inputMutants)).toPromise();
-      task.resolve(firstSandbox as unknown as Sandbox);
+      task.resolve((firstSandbox as unknown) as Sandbox);
       await runPromise;
       const disposePromise = sut.dispose();
-      task2.resolve(secondSandbox as unknown as Sandbox);
+      task2.resolve((secondSandbox as unknown) as Sandbox);
       await disposePromise;
       expect(secondSandbox.dispose).called;
     });
@@ -234,18 +245,22 @@ describe(SandboxPool.name, () => {
       const task2 = new Task<Sandbox>();
       createStub.reset();
       createStub
-        .onCall(0).returns(task.promise)
-        .onCall(1).returns(task2.promise)
-        .onCall(2).resolves(genericSandboxForAllSubsequentCallsToNewSandbox); // promise is not yet resolved
+        .onCall(0)
+        .returns(task.promise)
+        .onCall(1)
+        .returns(task2.promise)
+        .onCall(2)
+        .resolves(genericSandboxForAllSubsequentCallsToNewSandbox); // promise is not yet resolved
       inputMutants.push(transpiledMutant(), transpiledMutant()); // 3 mutants
 
       // Act
-      const runPromise = sut.runMutants(from(inputMutants))
+      const runPromise = sut
+        .runMutants(from(inputMutants))
         .pipe(toArray())
         .toPromise();
       const disposePromise = sut.dispose();
-      task.resolve(firstSandbox as unknown as Sandbox);
-      task2.resolve(secondSandbox as unknown as Sandbox);
+      task.resolve((firstSandbox as unknown) as Sandbox);
+      task2.resolve((secondSandbox as unknown) as Sandbox);
       await disposePromise;
       await runPromise;
 

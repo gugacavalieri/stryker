@@ -1,44 +1,37 @@
+import * as path from 'path';
+
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { RunResult, RunStatus, TestResult, TestStatus } from '@stryker-mutator/api/test_runner';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as path from 'path';
+
 import MochaTestRunner from '../../src/MochaTestRunner';
 import { createMochaOptions } from '../helpers/factories';
+
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
-const countTests = (runResult: RunResult, predicate: (result: TestResult) => boolean) =>
-  runResult.tests.filter(predicate).length;
+const countTests = (runResult: RunResult, predicate: (result: TestResult) => boolean) => runResult.tests.filter(predicate).length;
 
-const countSucceeded = (runResult: RunResult) =>
-  countTests(runResult, t => t.status === TestStatus.Success);
-const countFailed = (runResult: RunResult) =>
-  countTests(runResult, t => t.status === TestStatus.Failed);
+const countSucceeded = (runResult: RunResult) => countTests(runResult, t => t.status === TestStatus.Success);
+const countFailed = (runResult: RunResult) => countTests(runResult, t => t.status === TestStatus.Failed);
 
 function resolve(fileName: string) {
   return path.resolve(__dirname, '..', '..', fileName);
 }
 
 describe('Running a sample project', () => {
-
   let sut: MochaTestRunner;
   let spec: string[];
 
   function createSut() {
-    return testInjector.injector
-      .provideValue(commonTokens.sandboxFileNames, spec)
-      .injectClass(MochaTestRunner);
+    return testInjector.injector.provideValue(commonTokens.sandboxFileNames, spec).injectClass(MochaTestRunner);
   }
 
   describe('when tests pass', () => {
-
     beforeEach(() => {
-      spec = [
-        resolve('./testResources/sampleProject/MyMath.js'),
-        resolve('./testResources/sampleProject/MyMathSpec.js')
-      ];
+      spec = [resolve('./testResources/sampleProject/MyMath.js'), resolve('./testResources/sampleProject/MyMathSpec.js')];
       testInjector.options.mochaOptions = createMochaOptions({ spec });
       sut = createSut();
       return sut.init();
@@ -48,7 +41,11 @@ describe('Running a sample project', () => {
       const runResult = await sut.run({});
       expect(countSucceeded(runResult)).to.be.eq(5, 'Succeeded tests did not match');
       expect(countFailed(runResult)).to.be.eq(0, 'Failed tests did not match');
-      runResult.tests.forEach(t => expect(t.timeSpentMs).to.be.greaterThan(-1).and.to.be.lessThan(1000));
+      runResult.tests.forEach(t =>
+        expect(t.timeSpentMs)
+          .to.be.greaterThan(-1)
+          .and.to.be.lessThan(1000)
+      );
       expect(runResult.status).to.be.eq(RunStatus.Complete, 'Test result did not match');
       expect(runResult.coverage).to.not.be.ok;
     });
@@ -62,10 +59,7 @@ describe('Running a sample project', () => {
 
   describe('with an error in an un-included input file', () => {
     beforeEach(() => {
-      spec = [
-        resolve('testResources/sampleProject/MyMath.js'),
-        resolve('testResources/sampleProject/MyMathSpec.js'),
-      ];
+      spec = [resolve('testResources/sampleProject/MyMath.js'), resolve('testResources/sampleProject/MyMathSpec.js')];
       testInjector.options.mochaOptions = createMochaOptions({
         files: spec
       });
@@ -80,12 +74,8 @@ describe('Running a sample project', () => {
   });
 
   describe('with multiple failed tests', () => {
-
     before(() => {
-      spec = [
-        resolve('testResources/sampleProject/MyMath.js'),
-        resolve('testResources/sampleProject/MyMathFailedSpec.js')
-      ];
+      spec = [resolve('testResources/sampleProject/MyMath.js'), resolve('testResources/sampleProject/MyMathFailedSpec.js')];
       testInjector.options.mochaOptions = createMochaOptions({ spec });
       sut = createSut();
       return sut.init();
@@ -98,7 +88,6 @@ describe('Running a sample project', () => {
   });
 
   describe('when no tests are executed', () => {
-
     beforeEach(() => {
       spec = [resolve('./testResources/sampleProject/MyMath.js')];
       testInjector.options.mochaOptions = createMochaOptions({ spec });
@@ -110,7 +99,11 @@ describe('Running a sample project', () => {
       const runResult = await sut.run({});
       expect(countSucceeded(runResult)).to.be.eq(0, 'Succeeded tests did not match');
       expect(countFailed(runResult)).to.be.eq(0, 'Failed tests did not match');
-      runResult.tests.forEach(t => expect(t.timeSpentMs).to.be.greaterThan(-1).and.to.be.lessThan(1000));
+      runResult.tests.forEach(t =>
+        expect(t.timeSpentMs)
+          .to.be.greaterThan(-1)
+          .and.to.be.lessThan(1000)
+      );
       expect(runResult.status).to.be.eq(RunStatus.Complete, 'Test result did not match');
       expect(runResult.coverage).to.not.be.ok;
     });

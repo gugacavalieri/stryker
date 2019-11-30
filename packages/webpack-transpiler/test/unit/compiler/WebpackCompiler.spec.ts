@@ -2,6 +2,7 @@ import { File } from '@stryker-mutator/api/core';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Configuration } from 'webpack';
+
 import * as webpack from '../../../src/compiler/Webpack';
 import WebpackCompiler from '../../../src/compiler/WebpackCompiler';
 import InputFileSystem from '../../../src/fs/InputFileSystem';
@@ -25,7 +26,6 @@ describe('WebpackCompiler', () => {
   });
 
   describe('writeFilesToFs', () => {
-
     beforeEach(() => {
       sut = new WebpackCompiler(fakeWebpackConfig, inputFileSystemMock as any, outputFileSystemMock as any);
     });

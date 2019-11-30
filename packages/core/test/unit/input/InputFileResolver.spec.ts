@@ -1,3 +1,6 @@
+import * as os from 'os';
+import * as path from 'path';
+
 import { Config } from '@stryker-mutator/api/config';
 import { File } from '@stryker-mutator/api/core';
 import { SourceFile } from '@stryker-mutator/api/report';
@@ -5,20 +8,16 @@ import { testInjector } from '@stryker-mutator/test-helpers';
 import { createIsDirError, fileNotFoundError } from '@stryker-mutator/test-helpers/src/factory';
 import { childProcessAsPromised, errorToString, fsAsPromised } from '@stryker-mutator/util';
 import { expect } from 'chai';
-import os = require('os');
-import * as path from 'path';
 import * as sinon from 'sinon';
+
 import { coreTokens } from '../../../src/di';
 import InputFileResolver from '../../../src/input/InputFileResolver';
 import BroadcastReporter from '../../../src/reporters/BroadcastReporter';
 import * as fileUtils from '../../../src/utils/fileUtils';
 import { Mock, mock } from '../../helpers/producers';
 
-const files = (...namesWithContent: [string, string][]): File[] =>
-  namesWithContent.map((nameAndContent): File => new File(
-    path.resolve(nameAndContent[0]),
-    Buffer.from(nameAndContent[1])
-  ));
+const files = (...namesWithContent: Array<[string, string]>): File[] =>
+  namesWithContent.map((nameAndContent): File => new File(path.resolve(nameAndContent[0]), Buffer.from(nameAndContent[1])));
 
 describe(InputFileResolver.name, () => {
   let globStub: sinon.SinonStub;
@@ -30,14 +29,22 @@ describe(InputFileResolver.name, () => {
   beforeEach(() => {
     reporterMock = mock(BroadcastReporter);
     globStub = sinon.stub(fileUtils, 'glob');
-    readFileStub = sinon.stub(fsAsPromised, 'readFile')
-      .withArgs(sinon.match.string).resolves(Buffer.from('')) // fallback
-      .withArgs(sinon.match.string).resolves(Buffer.from('')) // fallback
-      .withArgs(sinon.match('file1')).resolves(Buffer.from('file 1 content'))
-      .withArgs(sinon.match('file2')).resolves(Buffer.from('file 2 content'))
-      .withArgs(sinon.match('file3')).resolves(Buffer.from('file 3 content'))
-      .withArgs(sinon.match('mute1')).resolves(Buffer.from('mutate 1 content'))
-      .withArgs(sinon.match('mute2')).resolves(Buffer.from('mutate 2 content'));
+    readFileStub = sinon
+      .stub(fsAsPromised, 'readFile')
+      .withArgs(sinon.match.string)
+      .resolves(Buffer.from('')) // fallback
+      .withArgs(sinon.match.string)
+      .resolves(Buffer.from('')) // fallback
+      .withArgs(sinon.match('file1'))
+      .resolves(Buffer.from('file 1 content'))
+      .withArgs(sinon.match('file2'))
+      .resolves(Buffer.from('file 2 content'))
+      .withArgs(sinon.match('file3'))
+      .resolves(Buffer.from('file 3 content'))
+      .withArgs(sinon.match('mute1'))
+      .resolves(Buffer.from('mutate 1 content'))
+      .withArgs(sinon.match('mute2'))
+      .resolves(Buffer.from('mutate 2 content'));
     globStub.withArgs('mute*').resolves(['/mute1.js', '/mute2.js']);
     globStub.withArgs('mute1').resolves(['/mute1.js']);
     globStub.withArgs('mute2').resolves(['/mute2.js']);
@@ -59,8 +66,9 @@ describe(InputFileResolver.name, () => {
     `)
     });
     const result = await sut.resolve();
-    expect(childProcessExecStub).calledWith('git ls-files --others --exclude-standard --cached --exclude /.stryker-tmp/*',
-      { maxBuffer: 10 * 1000 * 1024 });
+    expect(childProcessExecStub).calledWith('git ls-files --others --exclude-standard --cached --exclude /.stryker-tmp/*', {
+      maxBuffer: 10 * 1000 * 1024
+    });
     expect(result.files.map(file => file.name)).deep.eq([path.resolve('file1.js'), path.resolve('foo/bar/baz.ts')]);
   });
 
@@ -77,24 +85,27 @@ describe(InputFileResolver.name, () => {
 
     // Assert
     expect(childProcessExecStub).calledWith('git ls-files --others --exclude-standard --cached --exclude /foo-bar/*');
-   });
+  });
 
   it('should reject if there is no `files` array and `git ls-files` command fails', () => {
     const expectedError = new Error('fatal: Not a git repository (or any of the parent directories): .git');
     childProcessExecStub.rejects(expectedError);
-    return expect(createSut().resolve())
-      .rejectedWith(`Cannot determine input files. Either specify a \`files\` array in your stryker configuration, or make sure "${process.cwd()
-        }" is located inside a git repository. Inner error: ${
-        errorToString(expectedError)
-        }`);
+    return expect(createSut().resolve()).rejectedWith(
+      `Cannot determine input files. Either specify a \`files\` array in your stryker configuration, or make sure "${process.cwd()}" is located inside a git repository. Inner error: ${errorToString(
+        expectedError
+      )}`
+    );
   });
 
   it('should log a warning if no files were resolved', async () => {
     testInjector.options.files = [];
     sut = createSut();
     await sut.resolve();
-    expect(testInjector.logger.warn).calledWith(sinon.match(`No files selected. Please make sure you either${os.EOL} (1) Run Stryker inside a Git repository`)
-      .and(sinon.match('(2) Specify the \`files\` property in your Stryker configuration')));
+    expect(testInjector.logger.warn).calledWith(
+      sinon
+        .match(`No files selected. Please make sure you either${os.EOL} (1) Run Stryker inside a Git repository`)
+        .and(sinon.match('(2) Specify the `files` property in your Stryker configuration'))
+    );
   });
 
   it('should be able to handle deleted files reported by `git ls-files`', async () => {
@@ -124,23 +135,19 @@ describe(InputFileResolver.name, () => {
   });
 
   describe('with mutate file expressions', () => {
-
     it('should result in the expected mutate files', async () => {
       testInjector.options.mutate = ['mute*'];
       testInjector.options.files = ['file1', 'mute1', 'file2', 'mute2', 'file3'];
       sut = createSut();
       const result = await sut.resolve();
-      expect(result.filesToMutate.map(_ => _.name)).to.deep.equal([
-        path.resolve('/mute1.js'),
-        path.resolve('/mute2.js')
-      ]);
+      expect(result.filesToMutate.map(_ => _.name)).to.deep.equal([path.resolve('/mute1.js'), path.resolve('/mute2.js')]);
       expect(result.files.map(file => file.name)).to.deep.equal([
         path.resolve('/file1.js'),
         path.resolve('/mute1.js'),
         path.resolve('/file2.js'),
         path.resolve('/mute2.js'),
-        path.resolve('/file3.js')]
-      );
+        path.resolve('/file3.js')
+      ]);
     });
 
     it('should only report a mutate file when it is included in the resolved files', async () => {
@@ -148,9 +155,7 @@ describe(InputFileResolver.name, () => {
       testInjector.options.files = ['file1', 'mute1', 'file2', /*'mute2'*/ 'file3'];
       sut = createSut();
       const result = await sut.resolve();
-      expect(result.filesToMutate.map(_ => _.name)).to.deep.equal([
-        path.resolve('/mute1.js')
-      ]);
+      expect(result.filesToMutate.map(_ => _.name)).to.deep.equal([path.resolve('/mute1.js')]);
     });
 
     it('should report OnAllSourceFilesRead', async () => {
@@ -185,7 +190,6 @@ describe(InputFileResolver.name, () => {
   });
 
   describe('without mutate files', () => {
-
     beforeEach(() => {
       testInjector.options.files = ['file1', 'mute1'];
       sut = createSut();
@@ -193,7 +197,9 @@ describe(InputFileResolver.name, () => {
 
     it('should warn about dry-run', async () => {
       await sut.resolve();
-      expect(testInjector.logger.warn).calledWith(sinon.match('No files marked to be mutated, Stryker will perform a dry-run without actually mutating anything.'));
+      expect(testInjector.logger.warn).calledWith(
+        sinon.match('No files marked to be mutated, Stryker will perform a dry-run without actually mutating anything.')
+      );
     });
   });
 
@@ -212,7 +218,6 @@ describe(InputFileResolver.name, () => {
   });
 
   describe('when a globbing expression does not result in a result', () => {
-
     it('should log a warning', async () => {
       testInjector.options.files = ['file1', 'notExists'];
       testInjector.options.mutate = ['file1'];
@@ -226,7 +231,7 @@ describe(InputFileResolver.name, () => {
       testInjector.options.files = config.files;
       testInjector.options.mutate = config.mutate;
       sut = createSut();
-      childProcessExecStub.resolves({ stdout: Buffer.from(`src/foobar.js`) });
+      childProcessExecStub.resolves({ stdout: Buffer.from('src/foobar.js') });
       globStub.withArgs(config.mutate[0]).returns(['src/foobar.js']);
       await sut.resolve();
       expect(testInjector.logger.warn).not.called;
@@ -243,7 +248,6 @@ describe(InputFileResolver.name, () => {
   });
 
   describe('when excluding files with "!"', () => {
-
     it('should exclude the files that were previously included', async () => {
       testInjector.options.files = ['file2', 'file1', '!file2'];
       const sut = createSut();
@@ -267,7 +271,6 @@ describe(InputFileResolver.name, () => {
   });
 
   describe('when provided duplicate files', () => {
-
     it('should deduplicate files that occur more than once', async () => {
       testInjector.options.files = ['file2', 'file2'];
       const result = await createSut().resolve();
@@ -287,7 +290,7 @@ describe(InputFileResolver.name, () => {
     });
   });
 
-  function assertFilesEqual(actual: ReadonlyArray<File>, expected: ReadonlyArray<File>) {
+  function assertFilesEqual(actual: readonly File[], expected: readonly File[]) {
     expect(actual).lengthOf(expected.length);
     for (const index in actual) {
       expect(actual[index].name).eq(expected[index].name);
@@ -296,8 +299,6 @@ describe(InputFileResolver.name, () => {
   }
 
   function createSut() {
-    return testInjector.injector
-      .provideValue(coreTokens.reporter, reporterMock)
-      .injectClass(InputFileResolver);
+    return testInjector.injector.provideValue(coreTokens.reporter, reporterMock).injectClass(InputFileResolver);
   }
 });

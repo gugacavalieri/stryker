@@ -1,10 +1,12 @@
+import * as path from 'path';
+
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { factory, testInjector } from '@stryker-mutator/test-helpers';
 import { fsAsPromised } from '@stryker-mutator/util';
 import { expect } from 'chai';
 import * as mkdirp from 'mkdirp';
-import * as path from 'path';
 import * as sinon from 'sinon';
+
 import * as fileUtils from '../../../src/utils/fileUtils';
 import { TemporaryDirectory } from '../../../src/utils/TemporaryDirectory';
 
@@ -55,7 +57,7 @@ describe(TemporaryDirectory.name, () => {
   describe('dispose', () => {
     describe('when temp directory is initialized', () => {
       beforeEach(() => sut.initialize());
-      it('should call deleteDir fileApi', () => {
+      it('should call deleteDir fileApi', async () => {
         const expectedPath = path.resolve(tempDirName);
         deleteDirStub.resolves('delResolveStub');
 
@@ -76,5 +78,4 @@ describe(TemporaryDirectory.name, () => {
       });
     });
   });
-
 });

@@ -1,5 +1,7 @@
-import { expect } from 'chai';
 import * as path from 'path';
+
+import { expect } from 'chai';
+
 import InputFileSystem from '../../src/fs/InputFileSystem';
 
 function testResourcePath(...pathSegments: string[]) {
@@ -30,17 +32,14 @@ describe('InputFileSystem integration', () => {
 
     it('should be able to stat a dir', done => {
       testResourcePath('inputFileSystem', 'dir1', 'tempFile');
-      sut.stat(
-        testResourcePath('inputFileSystem', 'dir2'),
-        (err, stats: any) => {
-          if (err) {
-            done(err);
-          } else {
-            expect(stats.isDirectory()).ok;
-            done();
-          }
+      sut.stat(testResourcePath('inputFileSystem', 'dir2'), (err, stats: any) => {
+        if (err) {
+          done(err);
+        } else {
+          expect(stats.isDirectory()).ok;
+          done();
         }
-      );
+      });
     });
   });
 });

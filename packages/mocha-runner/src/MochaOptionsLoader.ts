@@ -1,8 +1,10 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { StrykerOptions } from '@stryker-mutator/api/core';
 import { Logger } from '@stryker-mutator/api/logging';
 import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
-import * as fs from 'fs';
-import * as path from 'path';
+
 import LibWrapper from './LibWrapper';
 import { MochaOptions } from './MochaOptions';
 import { filterConfig, mochaOptionsKey, serializeArguments } from './utils';
@@ -22,18 +24,17 @@ export const DEFAULT_MOCHA_OPTIONS = Object.freeze({
 });
 
 export default class MochaOptionsLoader {
-
   public static inject = tokens(commonTokens.logger);
-  constructor(private readonly log: Logger) { }
+  constructor(private readonly log: Logger) {}
 
   public load(strykerOptions: StrykerOptions): MochaOptions {
     const mochaOptions = { ...strykerOptions[mochaOptionsKey] } as MochaOptions;
-    return { ...DEFAULT_MOCHA_OPTIONS, ... this.loadMochaOptions(mochaOptions), ...mochaOptions };
+    return { ...DEFAULT_MOCHA_OPTIONS, ...this.loadMochaOptions(mochaOptions), ...mochaOptions };
   }
 
   private loadMochaOptions(overrides: MochaOptions) {
     if (LibWrapper.loadOptions) {
-      this.log.debug('Mocha >= 6 detected. Using mocha\'s `%s` to load mocha options', LibWrapper.loadOptions.name);
+      this.log.debug("Mocha >= 6 detected. Using mocha's `%s` to load mocha options", LibWrapper.loadOptions.name);
       return this.loadMocha6Options(overrides);
     } else {
       this.log.warn('DEPRECATED: Mocha < 6 detected. Please upgrade to at least Mocha version 6.');

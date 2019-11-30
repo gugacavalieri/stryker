@@ -1,6 +1,7 @@
 import { Logger } from '@stryker-mutator/api/logging';
 import { BaseContext, commonTokens, Injector, tokens } from '@stryker-mutator/api/plugin';
 import semver from 'semver';
+
 import JestPromiseAdapter from './JestPromiseTestAdapter';
 import JestTestAdapter from './JestTestAdapter';
 
@@ -16,6 +17,4 @@ export function jestTestAdapterFactory(log: Logger, jestVersion: string, injecto
 }
 
 jestTestAdapterFactory.inject = tokens(commonTokens.logger, JEST_VERSION_TOKEN, commonTokens.injector);
-export {
-  JestTestAdapter
-};
+export { JestTestAdapter };

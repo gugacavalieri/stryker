@@ -1,10 +1,9 @@
 import { expect } from 'chai';
+
 import ExpectMutation from './ExpectMutation';
 
 export default function StringLiteralMutatorSpec(name: string, expectMutation: ExpectMutation) {
-
   describe('StringLiteralMutator', () => {
-
     it('should have name "StringLiteral"', () => {
       expect(name).eq('StringLiteral');
     });
@@ -14,7 +13,7 @@ export default function StringLiteralMutatorSpec(name: string, expectMutation: E
     });
 
     it('should mutate a string literal with single quotes', () => {
-      expectMutation('const b = \'Hello world!\';', 'const b = "";');
+      expectMutation("const b = 'Hello world!';", 'const b = "";');
     });
 
     it('should mutate a template string', () => {

@@ -1,9 +1,9 @@
 import { Logger } from '@stryker-mutator/api/logging';
 import { RunResult, RunStatus, TestStatus } from '@stryker-mutator/api/test_runner';
+
 import Timer from './Timer';
 
 export class StrykerMochaReporter {
-
   /*
    * The stryker logger instance injected into this plugin
    * Needs to be set from 'the outside' because mocha doesn't really have a nice way of providing

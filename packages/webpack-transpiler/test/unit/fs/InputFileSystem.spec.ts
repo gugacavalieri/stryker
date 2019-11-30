@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { CachedInputFileSystem } from 'enhanced-resolve';
 import * as sinon from 'sinon';
+
 import InputFileSystem from '../../../src/fs/InputFileSystem';
 import MemoryFS, * as memoryFSModule from '../../../src/fs/MemoryFS';
 import { createMockInstance, Mock } from '../../helpers/producers';
@@ -18,11 +19,11 @@ describe('InputFileSystem', () => {
   });
 
   describe('writeFileSync', () => {
-    it(`should forward to memory fs`, () => {
+    it('should forward to memory fs', () => {
       sut.writeFileSync('path', 'content');
       expect(memoryFSMock.writeFileSync).calledWith('path', 'content');
     });
-    it(`should replace empty string content`, () => {
+    it('should replace empty string content', () => {
       sut.writeFileSync('path', '');
       expect(memoryFSMock.writeFileSync).calledWith('path', ' ');
     });
@@ -33,7 +34,6 @@ describe('InputFileSystem', () => {
   });
 
   describe('stat', () => {
-
     it('should forward to memory fs', done => {
       memoryFSMock.stat.callsArgWith(1, undefined, 'foobar');
       sut.stat('arg1', (_error, value) => {
@@ -61,7 +61,6 @@ describe('InputFileSystem', () => {
 
       // Act
       sut.stat('foo/bar/not/exits', err => {
-
         // Assert
         expect(err).eq(expectedError);
         done();
@@ -70,7 +69,6 @@ describe('InputFileSystem', () => {
   });
 
   describe('readFile', () => {
-
     it('should forward readFile to memory FS', done => {
       memoryFSMock.readFile.callsArgOnWith(2, sut, undefined, 'foobar');
       sut.readFile('path', {}, (_error: Error, value: string) => {
@@ -82,7 +80,7 @@ describe('InputFileSystem', () => {
     });
 
     it('should forward to real FS if memory-fs gave an error', done => {
-      memoryFSMock.readFile.callsArgOnWith(1, sut,  new Error('foobar'));
+      memoryFSMock.readFile.callsArgOnWith(1, sut, new Error('foobar'));
       innerFSMock.readFile.callsArgWith(1, undefined, 'the content');
       sut.readFile('foobar', (_error: Error, content: string) => {
         expect(content).eq('the content');
@@ -99,7 +97,6 @@ describe('InputFileSystem', () => {
 
       // Act
       sut.readFile('foo/bar/not/exits', (error: Error) => {
-
         // Assert
         expect(error).eq(expectedError);
         done();

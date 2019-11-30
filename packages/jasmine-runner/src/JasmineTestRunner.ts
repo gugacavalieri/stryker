@@ -1,17 +1,18 @@
+import { EOL } from 'os';
+
 import { StrykerOptions } from '@stryker-mutator/api/core';
 import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import { RunResult, RunStatus, TestResult, TestRunner } from '@stryker-mutator/api/test_runner';
 import { errorToString } from '@stryker-mutator/util';
-import { EOL } from 'os';
+
 import { evalGlobal, Jasmine, toStrykerTestResult } from './helpers';
 
 export default class JasmineTestRunner implements TestRunner {
-
   private readonly jasmineConfigFile: string | undefined;
   private readonly Date: typeof Date = Date; // take Date prototype now we still can (user might choose to mock it away)
 
   public static inject = tokens(commonTokens.sandboxFileNames, commonTokens.options);
-  constructor(private readonly fileNames: ReadonlyArray<string>, options: StrykerOptions) {
+  constructor(private readonly fileNames: readonly string[], options: StrykerOptions) {
     this.jasmineConfigFile = options.jasmineConfigFile;
   }
 
@@ -45,7 +46,7 @@ export default class JasmineTestRunner implements TestRunner {
       jasmine.addReporter(reporter);
       jasmine.execute();
     }).catch(error => ({
-      errorMessages: ['An error occurred while loading your jasmine specs' + EOL + errorToString(error)],
+      errorMessages: [`An error occurred while loading your jasmine specs${EOL}${errorToString(error)}`],
       status: RunStatus.Error,
       tests: []
     }));
@@ -57,7 +58,9 @@ export default class JasmineTestRunner implements TestRunner {
     jasmine.loadConfigFile(this.jasmineConfigFile);
     jasmine.stopSpecOnExpectationFailure(true);
     jasmine.env.throwOnExpectationFailure(true);
-    jasmine.exit = () => { };
+    console.log('test');
+
+    jasmine.exit = () => {};
     jasmine.clearReporters();
     jasmine.randomizeTests(false);
     return jasmine;

@@ -1,4 +1,5 @@
 import { StrykerOptions } from '@stryker-mutator/api/core';
+
 import { getTSConfig, isTypescriptFile, normalizeFileFromTypescript } from '../helpers/tsHelpers';
 
 /**
@@ -24,7 +25,6 @@ export default abstract class TranspileFilter {
  * A transpile filter based on ts config
  */
 export class TSConfigFilter extends TranspileFilter {
-
   private readonly fileNames: string[];
 
   constructor({ fileNames }: { fileNames: string[] }) {
@@ -33,7 +33,7 @@ export class TSConfigFilter extends TranspileFilter {
   }
 
   public isIncluded(fileName: string): boolean {
-    return this.fileNames.indexOf(fileName) !== -1;
+    return this.fileNames.includes(fileName);
   }
 }
 

@@ -3,6 +3,7 @@ import { RunOptions } from '@stryker-mutator/api/test_runner';
 import { strykerOptions } from '@stryker-mutator/test-helpers/src/factory';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import ChildProcessCrashedError from '../../../src/child-proxy/ChildProcessCrashedError';
 import ChildProcessProxy from '../../../src/child-proxy/ChildProcessProxy';
 import LoggingClientContext from '../../../src/logging/LoggingClientContext';
@@ -64,12 +65,10 @@ describe(ChildProcessTestRunnerDecorator.name, () => {
   });
 
   describe('dispose', () => {
-
     it('should dispose the test runner before disposing the child process itself on `dispose`', async () => {
       childProcessProxyMock.proxy.dispose.resolves();
       await sut.dispose();
-      expect(childProcessProxyMock.proxy.dispose)
-        .calledBefore(childProcessProxyMock.dispose);
+      expect(childProcessProxyMock.proxy.dispose).calledBefore(childProcessProxyMock.dispose);
     });
 
     it('should not reject when the child process is down', async () => {
@@ -87,6 +86,5 @@ describe(ChildProcessTestRunnerDecorator.name, () => {
       expect(childProcessProxyMock.dispose).called;
       testRunnerDisposeTask.resolve(undefined);
     });
-
   });
 });

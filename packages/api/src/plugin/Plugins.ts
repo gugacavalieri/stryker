@@ -1,10 +1,12 @@
 import { InjectableClass, InjectableFunction, InjectionToken } from 'typed-inject';
+
 import { ConfigEditor } from '../../config';
 import { Mutator } from '../../mutant';
 import { Reporter } from '../../report';
 import { TestFramework } from '../../test_framework';
 import { TestRunner } from '../../test_runner';
 import { Transpiler } from '../../transpile';
+
 import { PluginContexts } from './Contexts';
 import { PluginKind } from './PluginKind';
 
@@ -12,12 +14,13 @@ import { PluginKind } from './PluginKind';
  * Represents a StrykerPlugin
  */
 export type Plugin<TPluginKind extends PluginKind> =
-  FactoryPlugin<TPluginKind, InjectionToken<PluginContexts[TPluginKind]>[]> | ClassPlugin<TPluginKind, InjectionToken<PluginContexts[TPluginKind]>[]>;
+  | FactoryPlugin<TPluginKind, Array<InjectionToken<PluginContexts[TPluginKind]>>>
+  | ClassPlugin<TPluginKind, Array<InjectionToken<PluginContexts[TPluginKind]>>>;
 
 /**
  * Represents a plugin that is created with a factory method
  */
-export interface FactoryPlugin<TPluginKind extends PluginKind, Tokens extends InjectionToken<PluginContexts[TPluginKind]>[]> {
+export interface FactoryPlugin<TPluginKind extends PluginKind, Tokens extends Array<InjectionToken<PluginContexts[TPluginKind]>>> {
   readonly kind: TPluginKind;
   readonly name: string;
   /**
@@ -29,7 +32,7 @@ export interface FactoryPlugin<TPluginKind extends PluginKind, Tokens extends In
 /**
  * Represents a plugin that is created by instantiating a class.
  */
-export interface ClassPlugin<TPluginKind extends PluginKind, Tokens extends InjectionToken<PluginContexts[TPluginKind]>[]> {
+export interface ClassPlugin<TPluginKind extends PluginKind, Tokens extends Array<InjectionToken<PluginContexts[TPluginKind]>>> {
   readonly kind: TPluginKind;
   readonly name: string;
   /**
@@ -45,8 +48,11 @@ export interface ClassPlugin<TPluginKind extends PluginKind, Tokens extends Inje
  * @param name The name of the plugin
  * @param injectableClass The class to be instantiated for the plugin
  */
-export function declareClassPlugin<TPluginKind extends PluginKind, Tokens extends InjectionToken<PluginContexts[TPluginKind]>[]>(kind: TPluginKind, name: string, injectableClass: InjectableClass<PluginContexts[TPluginKind], PluginInterfaces[TPluginKind], Tokens>):
-  ClassPlugin<TPluginKind, Tokens> {
+export function declareClassPlugin<TPluginKind extends PluginKind, Tokens extends Array<InjectionToken<PluginContexts[TPluginKind]>>>(
+  kind: TPluginKind,
+  name: string,
+  injectableClass: InjectableClass<PluginContexts[TPluginKind], PluginInterfaces[TPluginKind], Tokens>
+): ClassPlugin<TPluginKind, Tokens> {
   return {
     injectableClass,
     kind,
@@ -60,8 +66,11 @@ export function declareClassPlugin<TPluginKind extends PluginKind, Tokens extend
  * @param name The name of the plugin
  * @param factory The factory used to instantiate the plugin
  */
-export function declareFactoryPlugin<TPluginKind extends PluginKind, Tokens extends InjectionToken<PluginContexts[TPluginKind]>[]>(kind: TPluginKind, name: string, factory: InjectableFunction<PluginContexts[TPluginKind], PluginInterfaces[TPluginKind], Tokens>):
-  FactoryPlugin<TPluginKind, Tokens> {
+export function declareFactoryPlugin<TPluginKind extends PluginKind, Tokens extends Array<InjectionToken<PluginContexts[TPluginKind]>>>(
+  kind: TPluginKind,
+  name: string,
+  factory: InjectableFunction<PluginContexts[TPluginKind], PluginInterfaces[TPluginKind], Tokens>
+): FactoryPlugin<TPluginKind, Tokens> {
   return {
     factory,
     kind,
@@ -93,5 +102,5 @@ export type Plugins = {
  */
 export interface PluginResolver {
   resolve<T extends keyof Plugins>(kind: T, name: string): Plugins[T];
-  resolveAll<T extends keyof Plugins>(kind: T): Plugins[T][];
+  resolveAll<T extends keyof Plugins>(kind: T): Array<Plugins[T]>;
 }

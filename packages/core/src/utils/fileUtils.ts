@@ -1,18 +1,23 @@
+import * as path from 'path';
+
 import { fsAsPromised } from '@stryker-mutator/util';
 import * as nodeGlob from 'glob';
 import * as mkdirp from 'mkdirp';
-import * as path from 'path';
 import * as rimraf from 'rimraf';
 
 export function glob(expression: string): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
-    nodeGlob(expression, { nodir: true }, (error, matches) => { error ? reject(error) : resolve(matches); });
+    nodeGlob(expression, { nodir: true }, (error, matches) => {
+      error ? reject(error) : resolve(matches);
+    });
   });
 }
 
 export function deleteDir(dirToDelete: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    rimraf(dirToDelete, error => { error ? reject(error) : resolve(); });
+    rimraf(dirToDelete, error => {
+      error ? reject(error) : resolve();
+    });
   });
 }
 
@@ -22,7 +27,6 @@ export async function cleanFolder(folderName: string) {
     await deleteDir(folderName);
     return mkdirp.sync(folderName);
   } catch (e) {
-
     return mkdirp.sync(folderName);
   }
 }

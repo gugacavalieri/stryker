@@ -1,5 +1,6 @@
 import { Config, ConfigEditor } from '@stryker-mutator/api/config';
 import jest from 'jest';
+
 import CustomJestConfigLoader from './configLoaders/CustomJestConfigLoader';
 import JestConfigLoader from './configLoaders/JestConfigLoader';
 import ReactScriptsJestConfigLoader from './configLoaders/ReactScriptsJestConfigLoader';
@@ -9,7 +10,6 @@ import JEST_OVERRIDE_OPTIONS from './jestOverrideOptions';
 const DEFAULT_PROJECT_NAME = 'custom';
 
 export default class JestConfigEditor implements ConfigEditor {
-
   public edit(strykerConfig: Config): void {
     // If there is no Jest property on the Stryker config create it
     strykerConfig.jest = strykerConfig.jest || {};

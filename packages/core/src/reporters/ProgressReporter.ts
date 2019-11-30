@@ -1,14 +1,15 @@
 import { MatchedMutant, MutantResult } from '@stryker-mutator/api/report';
+
 import ProgressBar from './ProgressBar';
 import ProgressKeeper from './ProgressKeeper';
 
 export default class ProgressBarReporter extends ProgressKeeper {
   private progressBar: ProgressBar;
 
-  public onAllMutantsMatchedWithTests(matchedMutants: ReadonlyArray<MatchedMutant>): void {
+  public onAllMutantsMatchedWithTests(matchedMutants: readonly MatchedMutant[]): void {
     super.onAllMutantsMatchedWithTests(matchedMutants);
     const progressBarContent =
-      `Mutation testing  [:bar] :percent (ETC :etc) :tested/:total tested (:survived survived)`;
+      'Mutation testing  [:bar] :percent (elapsed: :et, remaining: :etc) :tested/:total tested (:survived survived, :timedOut timed out)';
 
     this.progressBar = new ProgressBar(progressBarContent, {
       complete: '=',
@@ -23,7 +24,7 @@ export default class ProgressBarReporter extends ProgressKeeper {
     const ticksBefore = this.progress.tested;
     super.onMutantTested(result);
 
-    const progressBarContent = { ...this.progress, etc: this.getEtc() };
+    const progressBarContent = { ...this.progress, et: this.getElapsedTime(), etc: this.getEtc() };
 
     if (ticksBefore < this.progress.tested) {
       this.tick(progressBarContent);

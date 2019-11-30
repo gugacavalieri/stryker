@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { deserialize, serialize } from 'surrial';
+
 import { File } from '../../../core';
 
 describe('File', () => {
-
   it('should allow utf8 encoded string content in the constructor', () => {
     const actual = new File('foobar.js', 'string-content');
     expect(actual.content).deep.eq(Buffer.from('string-content'));

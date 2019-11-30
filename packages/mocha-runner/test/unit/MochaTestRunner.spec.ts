@@ -1,10 +1,12 @@
+import { EventEmitter } from 'events';
+import * as path from 'path';
+
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { RunOptions } from '@stryker-mutator/api/test_runner';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
 import * as Mocha from 'mocha';
-import * as path from 'path';
+
 import sinon = require('sinon');
 import LibWrapper from '../../src/LibWrapper';
 import { MochaOptions } from '../../src/MochaOptions';
@@ -13,7 +15,6 @@ import { StrykerMochaReporter } from '../../src/StrykerMochaReporter';
 import * as utils from '../../src/utils';
 
 describe(MochaTestRunner.name, () => {
-
   let MochaStub: sinon.SinonStub;
   let mocha: sinon.SinonStubbedInstance<Mocha> & { suite: sinon.SinonStubbedInstance<EventEmitter> };
   let sut: MochaTestRunner;
@@ -38,7 +39,7 @@ describe(MochaTestRunner.name, () => {
     delete StrykerMochaReporter.log;
   });
 
-  function createSut(mochaSettings: Partial<{ fileNames: ReadonlyArray<string>, mochaOptions: MochaOptions }>) {
+  function createSut(mochaSettings: Partial<{ fileNames: readonly string[]; mochaOptions: MochaOptions }>) {
     testInjector.options.mochaOptions = mochaSettings.mochaOptions || {};
     return testInjector.injector
       .provideValue(commonTokens.sandboxFileNames, mochaSettings.fileNames || ['src/math.js', 'test/mathSpec.js'])
@@ -120,8 +121,9 @@ describe(MochaTestRunner.name, () => {
       const actFn = () => sut.init();
 
       // Assert
-      expect(actFn).throws(`[MochaTestRunner] No files discovered (tried pattern(s) ${relativeGlobbing
-        }). Please specify the files (glob patterns) containing your tests in mochaOptions.files in your stryker.conf.js file.`);
+      expect(actFn).throws(
+        `[MochaTestRunner] No files discovered (tried pattern(s) ${relativeGlobbing}). Please specify the files (glob patterns) containing your tests in mochaOptions.files in your stryker.conf.js file.`
+      );
       expect(testInjector.logger.debug).calledWith(`Tried ${absoluteGlobbing} on files: ${filesStringified}.`);
     });
 
@@ -145,17 +147,17 @@ describe(MochaTestRunner.name, () => {
     it('should log about mocha >= 6 detection', async () => {
       sut = createSut({});
       await sut.init();
-      expect(testInjector.logger.debug).calledWith('Mocha >= 6 detected. Using mocha\'s `handleFiles` to load files');
+      expect(testInjector.logger.debug).calledWith("Mocha >= 6 detected. Using mocha's `handleFiles` to load files");
     });
 
     it('should mock away the `process.exit` method when calling the mocha function (unfortunate side effect)', async () => {
       sut = createSut({});
       const originalProcessExit = process.exit;
       let stubbedProcessExit = process.exit;
-      handleFilesStub.callsFake(() => stubbedProcessExit = process.exit);
+      handleFilesStub.callsFake(() => (stubbedProcessExit = process.exit));
       await sut.init();
-      expect(originalProcessExit, 'Process.exit doesn\'t seem to be stubbed away').not.eq(stubbedProcessExit);
-      expect(originalProcessExit, 'Process.exit doesn\'t seem to be reset').eq(process.exit);
+      expect(originalProcessExit, "Process.exit doesn't seem to be stubbed away").not.eq(stubbedProcessExit);
+      expect(originalProcessExit, "Process.exit doesn't seem to be reset").eq(process.exit);
     });
 
     it('should pass along supported options to mocha', async () => {
@@ -227,12 +229,10 @@ describe(MochaTestRunner.name, () => {
       expect(require.cache['bar.js']).undefined;
       expect(require.cache['baz.js']).eq('baz');
     });
-
   });
 
   async function actRun(options: RunOptions = { timeout: 0 }) {
     mocha.run.callsArg(0);
     return sut.run(options);
   }
-
 });

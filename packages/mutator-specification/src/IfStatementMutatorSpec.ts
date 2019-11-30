@@ -1,9 +1,12 @@
 import { expect } from 'chai';
+
 import ExpectMutation from './ExpectMutation';
 
 export default function IfStatementMutatorSpec(name: string, expectMutation: ExpectMutation) {
-
   describe('IfStatementMutator', () => {
+    beforeEach(() => {
+      console.warn('DEPRECATED: please migrate from the IfStatementMutatorSpec to the ConditionalExpressionMutatorSpec');
+    });
 
     it('should have name "IfStatement"', () => {
       expect(name).eq('IfStatement');
@@ -12,6 +15,5 @@ export default function IfStatementMutatorSpec(name: string, expectMutation: Exp
     it('should mutate an expression to `true` and `false`', () => {
       expectMutation('if (something) { a++ }', 'if (true) { a++ }', 'if (false) { a++ }');
     });
-
   });
 }

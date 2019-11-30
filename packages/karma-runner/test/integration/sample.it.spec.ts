@@ -1,11 +1,12 @@
+import * as path from 'path';
+
 import { TestStatus } from '@stryker-mutator/api/test_runner';
 import { testInjector } from '@stryker-mutator/test-helpers';
-import * as path from 'path';
+
 import KarmaTestRunner from '../../src/KarmaTestRunner';
 import { expectTestResults } from '../helpers/assertions';
 
 describe('Sample project', () => {
-
   it('should be able to run karma', async () => {
     testInjector.options.karma = { configFile: path.resolve(__dirname, '..', '..', 'testResources', 'sampleProject', 'karma.conf.js') };
     const runner = testInjector.injector.injectClass(KarmaTestRunner);
@@ -43,7 +44,8 @@ describe('Sample project', () => {
       {
         name: 'Circle should have a circumference of 2PI when the radius is 1',
         status: TestStatus.Success
-      }, {
+      },
+      {
         name: 'Add this test should fail',
         status: TestStatus.Failed
       }

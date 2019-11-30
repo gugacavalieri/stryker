@@ -1,18 +1,17 @@
+import * as os from 'os';
+
 import { MutantResult, MutantStatus, mutationTestReportSchema } from '@stryker-mutator/api/report';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { mutantResult, mutationScoreThresholds } from '@stryker-mutator/test-helpers/src/factory';
 import { expect } from 'chai';
-import chalk from 'chalk';
-import * as os from 'os';
 import * as sinon from 'sinon';
+
+import chalk = require('chalk');
+
 import ClearTextReporter from '../../../src/reporters/ClearTextReporter';
 
 const colorizeFileAndPosition = (sourceFilePath: string, line: number, column: number) => {
-  return [
-    chalk.cyan(sourceFilePath),
-    chalk.yellow(`${line}`),
-    chalk.yellow(`${column}`),
-  ].join(':');
+  return [chalk.cyan(sourceFilePath), chalk.yellow(`${line}`), chalk.yellow(`${column}`)].join(':');
 };
 
 describe(ClearTextReporter.name, () => {
@@ -25,7 +24,6 @@ describe(ClearTextReporter.name, () => {
   });
 
   describe('onMutationTestReportReady', () => {
-
     it('should report the clear text table with correct values', () => {
       testInjector.options.coverageAnalysis = 'all';
       sut = testInjector.injector.injectClass(ClearTextReporter);
@@ -85,7 +83,6 @@ describe(ClearTextReporter.name, () => {
     });
 
     describe('onAllMutantsTested() all mutants except error', () => {
-
       beforeEach(() => {
         sut.onAllMutantsTested(mutantResults(MutantStatus.Killed, MutantStatus.Survived, MutantStatus.TimedOut, MutantStatus.NoCoverage));
       });
@@ -95,15 +92,23 @@ describe(ClearTextReporter.name, () => {
     });
 
     describe('onAllMutantsTested() with mutants of all kinds', () => {
-
       beforeEach(() => {
-        sut.onAllMutantsTested(mutantResults(MutantStatus.Killed, MutantStatus.Survived, MutantStatus.TimedOut, MutantStatus.NoCoverage, MutantStatus.RuntimeError, MutantStatus.TranspileError));
+        sut.onAllMutantsTested(
+          mutantResults(
+            MutantStatus.Killed,
+            MutantStatus.Survived,
+            MutantStatus.TimedOut,
+            MutantStatus.NoCoverage,
+            MutantStatus.RuntimeError,
+            MutantStatus.TranspileError
+          )
+        );
       });
 
       it('should report on the survived mutant', () => {
         expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match('1. [Survived] Math'));
-        expect(process.stdout.write).to.have.been.calledWith(chalk.red('-   original line') + os.EOL);
-        expect(process.stdout.write).to.have.been.calledWith(chalk.green('+   mutated line') + os.EOL);
+        expect(process.stdout.write).to.have.been.calledWith(`${chalk.red('-   original line')}${os.EOL}`);
+        expect(process.stdout.write).to.have.been.calledWith(`${chalk.green('+   mutated line')}${os.EOL}`);
       });
 
       it('should not log individual ran tests', () => {
@@ -111,13 +116,10 @@ describe(ClearTextReporter.name, () => {
         expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match('Ran all tests for this mutant.'));
       });
     });
-
   });
 
   describe('when coverageAnalysis: "perTest"', () => {
-
     describe('onAllMutantsTested()', () => {
-
       it('should log source file names with colored text when clearTextReporter is not false', () => {
         testInjector.options.coverageAnalysis = 'perTest';
 
@@ -134,7 +136,7 @@ describe(ClearTextReporter.name, () => {
 
         sut.onAllMutantsTested(mutantResults(MutantStatus.Killed, MutantStatus.Survived, MutantStatus.TimedOut, MutantStatus.NoCoverage));
 
-        expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match(`sourceFile.ts:1:2`));
+        expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match('sourceFile.ts:1:2'));
       });
 
       it('should not log source file names with colored text when clearTextReporter is false', () => {
@@ -155,7 +157,6 @@ describe(ClearTextReporter.name, () => {
         expect(process.stdout.write).to.not.have.been.calledWithMatch(sinon.match('    a second test'));
         expect(process.stdout.write).to.not.have.been.calledWithMatch(sinon.match('    a third test'));
         expect(process.stdout.write).to.not.have.been.calledWithMatch(sinon.match('Ran all tests for this mutant.'));
-
       });
 
       it('should log individual ran tests when logTests is true', () => {
@@ -233,8 +234,7 @@ describe(ClearTextReporter.name, () => {
   });
 
   describe('when coverageAnalysis: "off"', () => {
-
-    beforeEach(() => testInjector.options.coverageAnalysis = 'off');
+    beforeEach(() => (testInjector.options.coverageAnalysis = 'off'));
 
     describe('onAllMutantsTested()', () => {
       beforeEach(() => {
@@ -247,7 +247,7 @@ describe(ClearTextReporter.name, () => {
       });
 
       it('should report the average amount of tests ran', () =>
-        expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match(`Ran 3.00 tests per mutant on average.`)));
+        expect(process.stdout.write).to.have.been.calledWithMatch(sinon.match('Ran 3.00 tests per mutant on average.')));
     });
   });
 
@@ -267,5 +267,4 @@ describe(ClearTextReporter.name, () => {
       return result;
     });
   }
-
 });

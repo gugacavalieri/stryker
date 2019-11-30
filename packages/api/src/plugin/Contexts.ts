@@ -1,5 +1,6 @@
-import { StrykerOptions } from '../../core';
+import { MutatorDescriptor, StrykerOptions } from '../../core';
 import { Logger, LoggerFactoryMethod } from '../../logging';
+
 import { PluginKind } from './PluginKind';
 import { PluginResolver } from './Plugins';
 import { commonTokens } from './tokens';
@@ -19,6 +20,7 @@ export interface BaseContext {
  */
 export interface OptionsContext extends BaseContext {
   [commonTokens.options]: StrykerOptions;
+  [commonTokens.mutatorDescriptor]: MutatorDescriptor;
 }
 
 /**
@@ -32,7 +34,7 @@ export interface TranspilerPluginContext extends OptionsContext {
  * The dependency injection context for a `TestRunnerPlugin`
  */
 export interface TestRunnerPluginContext extends OptionsContext {
-  [commonTokens.sandboxFileNames]: ReadonlyArray<string>;
+  [commonTokens.sandboxFileNames]: readonly string[];
 }
 
 /**

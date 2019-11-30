@@ -1,13 +1,15 @@
+import * as os from 'os';
+
 import { MutantResult, MutantStatus } from '@stryker-mutator/api/report';
 import { factory } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import chalk from 'chalk';
-import * as os from 'os';
 import * as sinon from 'sinon';
+
+import chalk = require('chalk');
+
 import DotsReporter from '../../../src/reporters/DotsReporter';
 
 describe('DotsReporter', () => {
-
   let sut: DotsReporter;
   let sandbox: sinon.SinonSandbox;
 
@@ -18,9 +20,7 @@ describe('DotsReporter', () => {
   });
 
   describe('onMutantTested()', () => {
-
     describe('when status is Killed', () => {
-
       beforeEach(() => {
         sut.onMutantTested(mutantResult(MutantStatus.Killed));
       });
@@ -31,7 +31,6 @@ describe('DotsReporter', () => {
     });
 
     describe('when status is TimedOut', () => {
-
       beforeEach(() => {
         sut.onMutantTested(mutantResult(MutantStatus.TimedOut));
       });
@@ -42,7 +41,6 @@ describe('DotsReporter', () => {
     });
 
     describe('when status is Survived', () => {
-
       beforeEach(() => {
         sut.onMutantTested(mutantResult(MutantStatus.Survived));
       });
@@ -77,5 +75,4 @@ describe('DotsReporter', () => {
       testsRan: ['']
     });
   }
-
 });

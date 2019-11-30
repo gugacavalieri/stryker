@@ -4,6 +4,7 @@ import { Transpiler } from '@stryker-mutator/api/transpile';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import { coreTokens } from '../../../src/di';
 import { PluginCreator } from '../../../src/di/PluginCreator';
 import { TranspilerFacade } from '../../../src/transpiler/TranspilerFacade';
@@ -14,7 +15,6 @@ describe(TranspilerFacade.name, () => {
   let pluginCreatorMock: sinon.SinonStubbedInstance<PluginCreator<PluginKind.Transpiler>>;
 
   describe('when there are no transpilers', () => {
-
     beforeEach(() => {
       pluginCreatorMock = sinon.createStubInstance(PluginCreator);
       sut = createSut();
@@ -29,11 +29,10 @@ describe(TranspilerFacade.name, () => {
   });
 
   describe('with 2 transpilers', () => {
-
     let transpilerOne: Mock<Transpiler>;
     let transpilerTwo: Mock<Transpiler>;
-    let resultFilesOne: ReadonlyArray<File>;
-    let resultFilesTwo: ReadonlyArray<File>;
+    let resultFilesOne: readonly File[];
+    let resultFilesTwo: readonly File[];
     beforeEach(() => {
       testInjector.options.transpilers = ['transpiler-one', 'transpiler-two'];
       transpilerOne = mock(TranspilerFacade);
@@ -42,8 +41,10 @@ describe(TranspilerFacade.name, () => {
       resultFilesTwo = [new File('result-2', '')];
       pluginCreatorMock = sinon.createStubInstance(PluginCreator);
       pluginCreatorMock.create
-        .withArgs('transpiler-one').returns(transpilerOne)
-        .withArgs('transpiler-two').returns(transpilerTwo);
+        .withArgs('transpiler-one')
+        .returns(transpilerOne)
+        .withArgs('transpiler-two')
+        .returns(transpilerTwo);
       transpilerOne.transpile.resolves(resultFilesOne);
       transpilerTwo.transpile.resolves(resultFilesTwo);
       sut = createSut();
@@ -74,17 +75,16 @@ describe(TranspilerFacade.name, () => {
       const transpilePromise = sut.transpile(input);
 
       // Assert
-      await (expect(transpilePromise).rejectedWith('An error occurred in transpiler "transpiler-one". Inner error: Error: an error'));
+      await expect(transpilePromise).rejectedWith('An error occurred in transpiler "transpiler-one". Inner error: Error: an error');
 
       // Assert
       expect(transpilerOne.transpile).calledWith(input);
       expect(transpilerTwo.transpile).not.called;
     });
-
   });
   function createSut() {
     return testInjector.injector
-      .provideValue(coreTokens.pluginCreatorTranspiler, pluginCreatorMock as unknown as PluginCreator<PluginKind.Transpiler>)
+      .provideValue(coreTokens.pluginCreatorTranspiler, (pluginCreatorMock as unknown) as PluginCreator<PluginKind.Transpiler>)
       .injectClass(TranspilerFacade);
   }
 });

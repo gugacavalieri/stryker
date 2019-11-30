@@ -1,9 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { TestSelection } from '@stryker-mutator/api/test_framework';
 import { expect } from 'chai';
 import * as execa from 'execa';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as rimraf from 'rimraf';
+
 import JasmineTestFramework from '../../src/JasmineTestFramework';
 
 interface JasmineTest {
@@ -16,7 +18,6 @@ interface JasmineTest {
 }
 
 describe('Selecting tests with nested suites', () => {
-
   let sut: JasmineTestFramework;
   let testSelections: TestSelection[];
   const jsonReporterFile = path.resolve(__dirname, '..', '..', 'testResources', 'json-reporter.js');

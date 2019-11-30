@@ -2,6 +2,7 @@ import { PluginKind } from '@stryker-mutator/api/plugin';
 import { factory, testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import { ConfigEditorApplier } from '../../../src/config/ConfigEditorApplier';
 import { coreTokens } from '../../../src/di';
 import { PluginCreator } from '../../../src/di/PluginCreator';
@@ -13,7 +14,7 @@ describe('ConfigEditorApplier', () => {
   beforeEach(() => {
     pluginCreatorMock = sinon.createStubInstance(PluginCreator);
     sut = testInjector.injector
-      .provideValue(coreTokens.pluginCreatorConfigEditor, pluginCreatorMock as unknown as PluginCreator<PluginKind.ConfigEditor>)
+      .provideValue(coreTokens.pluginCreatorConfigEditor, (pluginCreatorMock as unknown) as PluginCreator<PluginKind.ConfigEditor>)
       .injectClass(ConfigEditorApplier);
   });
 
@@ -24,11 +25,12 @@ describe('ConfigEditorApplier', () => {
     const configEditorPlugins = [{ name: 'fooConfigEditorPlugin' }, { name: 'barConfigEditorPlugin' }];
     testInjector.pluginResolver.resolveAll.returns(configEditorPlugins);
     pluginCreatorMock.create
-      .withArgs(configEditorPlugins[0].name).returns(fooConfigEditor)
-      .withArgs(configEditorPlugins[1].name).returns(barConfigEditor);
+      .withArgs(configEditorPlugins[0].name)
+      .returns(fooConfigEditor)
+      .withArgs(configEditorPlugins[1].name)
+      .returns(barConfigEditor);
     sut.edit(config);
     expect(fooConfigEditor.edit).calledWith(config);
     expect(barConfigEditor.edit).calledWith(config);
   });
-
 });

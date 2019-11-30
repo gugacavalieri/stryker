@@ -1,24 +1,34 @@
+import * as path from 'path';
+
 import { LogLevel } from '@stryker-mutator/api/core';
 import { Logger } from '@stryker-mutator/api/logging';
 import { factory } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import * as path from 'path';
 import * as sinon from 'sinon';
 import { rootInjector } from 'typed-inject';
+
 import ChildProcessProxyWorker from '../../../src/child-proxy/ChildProcessProxyWorker';
-import { CallMessage, InitMessage, ParentMessage, ParentMessageKind, WorkerMessage, WorkerMessageKind, WorkResult } from '../../../src/child-proxy/messageProtocol';
+import {
+  CallMessage,
+  InitMessage,
+  ParentMessage,
+  ParentMessageKind,
+  WorkerMessage,
+  WorkerMessageKind,
+  WorkResult
+} from '../../../src/child-proxy/messageProtocol';
 import * as di from '../../../src/di';
 import LogConfigurator from '../../../src/logging/LogConfigurator';
 import LoggingClientContext from '../../../src/logging/LoggingClientContext';
 import { serialize } from '../../../src/utils/objectUtils';
 import currentLogMock from '../../helpers/logMock';
 import { Mock } from '../../helpers/producers';
+
 import { HelloClass } from './HelloClass';
 
 const LOGGING_CONTEXT: LoggingClientContext = Object.freeze({ port: 4200, level: LogLevel.Fatal });
 
 describe(ChildProcessProxyWorker.name, () => {
-
   let processOnStub: sinon.SinonStub;
   let processSendStub: sinon.SinonStub;
   let processListenersStub: sinon.SinonStub;
@@ -56,7 +66,6 @@ describe(ChildProcessProxyWorker.name, () => {
   });
 
   describe('after init message', () => {
-
     let sut: ChildProcessProxyWorker;
     let initMessage: InitMessage;
 
@@ -64,7 +73,7 @@ describe(ChildProcessProxyWorker.name, () => {
       sut = new ChildProcessProxyWorker();
       const options = factory.strykerOptions();
       initMessage = {
-        additionalInjectableValues: { name: 'FooBarName'},
+        additionalInjectableValues: { name: 'FooBarName' },
         kind: WorkerMessageKind.Init,
         loggingContext: LOGGING_CONTEXT,
         options,
@@ -88,7 +97,7 @@ describe(ChildProcessProxyWorker.name, () => {
       expect(processChdirStub).calledWith(fullWorkingDir);
     });
 
-    it('should not change the current working directory if it didn\'t change', () => {
+    it("should not change the current working directory if it didn't change", () => {
       initMessage.workingDirectory = process.cwd();
       processOnMessage(initMessage);
       expect(logMock.debug).not.called;
@@ -104,7 +113,7 @@ describe(ChildProcessProxyWorker.name, () => {
 
     it('should remove any additional listeners', async () => {
       // Arrange
-      function noop() { }
+      function noop() {}
       processes.push(noop);
 
       // Act
@@ -134,7 +143,6 @@ describe(ChildProcessProxyWorker.name, () => {
     });
 
     describe('on worker message', () => {
-
       async function actAndAssert(workerMessage: CallMessage, expectedResult: WorkResult) {
         // Act
         processOnMessage(initMessage);
@@ -227,16 +235,12 @@ describe(ChildProcessProxyWorker.name, () => {
 
         await actAndAssert(workerMessage, expectedResult);
       });
-
     });
   });
 
   function processOnMessage(message: WorkerMessage) {
-    processOnStub
-      .withArgs('message')
-      .callArgWith(1, [serialize(message)]);
+    processOnStub.withArgs('message').callArgWith(1, [serialize(message)]);
   }
-
 });
 
 function tick() {

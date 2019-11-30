@@ -1,10 +1,11 @@
-import { expect } from 'chai';
-import fs = require('fs');
+import * as fs from 'fs';
 import { promisify } from 'util';
+
+import { expect } from 'chai';
+
 import { fsAsPromised } from '../../src';
 
 describe('fsAsPromised', () => {
-
   describePromisifiedFunction('exists');
   describePromisifiedFunction('lstat');
   describePromisifiedFunction('symlink');

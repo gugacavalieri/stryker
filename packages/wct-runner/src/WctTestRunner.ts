@@ -4,15 +4,16 @@ import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import { RunResult, RunStatus, TestRunner } from '@stryker-mutator/api/test_runner';
 import { steps } from 'web-component-tester';
 import { Context } from 'web-component-tester/runner/context';
+
 import WctLogger from './WctLogger';
 import WctReporter from './WctReporter';
+
 const WCT_PACKAGE = 'web-component-tester';
 const FORCED_WCT_OPTIONS = Object.freeze({
   persistent: false
 });
 
 export default class WctTestRunner implements TestRunner {
-
   private readonly reporter: WctReporter;
   private readonly context: Context;
   private readonly logger: WctLogger;
@@ -20,7 +21,9 @@ export default class WctTestRunner implements TestRunner {
   public static inject = tokens(commonTokens.logger, commonTokens.options);
   constructor(private readonly log: Logger, options: StrykerOptions) {
     if (options.coverageAnalysis !== 'off') {
-      throw new Error(`Coverage analysis "${options.coverageAnalysis}" is not (yet) supported by the WCT test runner plugin. Please set \`coverageAnalysis: "off"\` in your stryker.conf.js file.`);
+      throw new Error(
+        `Coverage analysis "${options.coverageAnalysis}" is not (yet) supported by the WCT test runner plugin. Please set \`coverageAnalysis: "off"\` in your stryker.conf.js file.`
+      );
     }
     this.log.debug('Running wct version %s from %s', require(`${WCT_PACKAGE}/package.json`).version, require.resolve(WCT_PACKAGE));
     this.context = this.loadContext(options);
@@ -31,7 +34,7 @@ export default class WctTestRunner implements TestRunner {
   private loadContext(options: StrykerOptions) {
     const context = new Context(Object.assign({}, options.wct, FORCED_WCT_OPTIONS));
     if (this.log.isDebugEnabled()) {
-      this.log.debug(`WCT options: %s`, JSON.stringify(this.context.options));
+      this.log.debug('WCT options: %s', JSON.stringify(this.context.options));
     }
     return context;
   }
@@ -66,7 +69,7 @@ export default class WctTestRunner implements TestRunner {
   }
 
   private static ignoreFailedTests(error: Error) {
-    if (!error.message.match(/\d+ failed tests?/)) {
+    if (!/\d+ failed tests?/.exec(error.message)) {
       throw error;
     }
   }

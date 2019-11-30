@@ -3,6 +3,7 @@ import { Transpiler } from '@stryker-mutator/api/transpile';
 import { StrykerError } from '@stryker-mutator/util';
 import { FileCoverageData, Range } from 'istanbul-lib-coverage';
 import { createInstrumenter, Instrumenter } from 'istanbul-lib-instrument';
+
 import { COVERAGE_CURRENT_TEST_VARIABLE_NAME } from './coverageHooks';
 
 export interface CoverageMaps {
@@ -15,15 +16,14 @@ export interface CoverageMapsByFile {
 }
 
 export default class CoverageInstrumenterTranspiler implements Transpiler {
-
   private readonly instrumenter: Instrumenter;
   public fileCoverageMaps: CoverageMapsByFile = Object.create(null);
 
-  constructor(private readonly settings: StrykerOptions, private readonly filesToInstrument: ReadonlyArray<string>) {
+  constructor(private readonly settings: StrykerOptions, private readonly filesToInstrument: readonly string[]) {
     this.instrumenter = createInstrumenter({ coverageVariable: this.coverageVariable, preserveComments: true });
   }
 
-  public async transpile(files: ReadonlyArray<File>): Promise<ReadonlyArray<File>> {
+  public async transpile(files: readonly File[]): Promise<readonly File[]> {
     return files.map(file => this.instrumentFileIfNeeded(file));
   }
 
@@ -91,7 +91,7 @@ export default class CoverageInstrumenterTranspiler implements Transpiler {
       fnMap: {},
       statementMap: input.statementMap
     };
-    Object.keys(input.fnMap).forEach(key => output.fnMap[key] = input.fnMap[key].loc);
+    Object.keys(input.fnMap).forEach(key => (output.fnMap[key] = input.fnMap[key].loc));
     return output;
   }
 }

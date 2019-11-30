@@ -3,6 +3,7 @@ import { factory } from '@stryker-mutator/test-helpers';
 import { FileCoverageData } from 'istanbul-lib-coverage';
 import { Logger } from 'log4js';
 import * as sinon from 'sinon';
+
 import SourceFile from '../../src/SourceFile';
 import TestableMutant from '../../src/TestableMutant';
 import TranspiledMutant from '../../src/TranspiledMutant';
@@ -81,14 +82,16 @@ export const transpileResult = factoryMethod<TranspileResult>(() => ({
 
 export const sourceFile = () => new SourceFile(factory.file());
 
-export const testableMutant = (fileName = 'file', mutatorName = 'foobarMutator') => new TestableMutant('1337', factory.mutant({
-  fileName,
-  mutatorName,
-  range: [12, 13],
-  replacement: '-'
-}), new SourceFile(
-  new File(fileName, Buffer.from('const a = 4 + 5'))
-));
+export const testableMutant = (fileName = 'file', mutatorName = 'foobarMutator') =>
+  new TestableMutant(
+    '1337',
+    factory.mutant({
+      fileName,
+      mutatorName,
+      range: [12, 13],
+      replacement: '-'
+    }),
+    new SourceFile(new File(fileName, Buffer.from('const a = 4 + 5')))
+  );
 
-export const transpiledMutant = (fileName = 'file') =>
-  new TranspiledMutant(testableMutant(fileName), transpileResult(), true);
+export const transpiledMutant = (fileName = 'file') => new TranspiledMutant(testableMutant(fileName), transpileResult(), true);

@@ -1,15 +1,16 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { Config } from '@stryker-mutator/api/config';
 import { File } from '@stryker-mutator/api/core';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import * as fs from 'fs';
-import * as path from 'path';
+
 import { CONFIG_KEY } from '../../src/helpers/keys';
 import TypescriptConfigEditor from '../../src/TypescriptConfigEditor';
 import TypescriptTranspiler from '../../src/TypescriptTranspiler';
 
 describe('AllowJS integration', () => {
-
   let config: Config;
   let inputFiles: File[];
 
@@ -17,7 +18,7 @@ describe('AllowJS integration', () => {
     const configEditor = testInjector.injector.injectClass(TypescriptConfigEditor);
     config = new Config();
     config.set({
-      tsconfigFile: path.resolve(__dirname, '..', '..', 'testResources', 'allowJS', 'tsconfig.json'),
+      tsconfigFile: path.resolve(__dirname, '..', '..', 'testResources', 'allowJS', 'tsconfig.json')
     });
     configEditor.edit(config);
     inputFiles = config[CONFIG_KEY].fileNames.map((fileName: string) => new File(fileName, fs.readFileSync(fileName, 'utf8')));

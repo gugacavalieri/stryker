@@ -1,4 +1,5 @@
 import { StrykerOptions } from '@stryker-mutator/api/core';
+
 import LoggingClientContext from '../logging/LoggingClientContext';
 
 export enum WorkerMessageKind {
@@ -31,7 +32,9 @@ export interface InitMessage {
   additionalInjectableValues: unknown;
 }
 
-export interface DisposeMessage { kind: WorkerMessageKind.Dispose; }
+export interface DisposeMessage {
+  kind: WorkerMessageKind.Dispose;
+}
 
 export interface WorkResult {
   kind: ParentMessageKind.Result;

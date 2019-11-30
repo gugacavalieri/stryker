@@ -1,3 +1,5 @@
+import { EOL } from 'os';
+
 import { File, LogLevel } from '@stryker-mutator/api/core';
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { TestFramework } from '@stryker-mutator/api/test_framework';
@@ -6,8 +8,8 @@ import { Transpiler } from '@stryker-mutator/api/transpile';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { runResult, testFramework, testResult, transpiler } from '@stryker-mutator/test-helpers/src/factory';
 import { expect } from 'chai';
-import { EOL } from 'os';
 import * as sinon from 'sinon';
+
 import { coreTokens } from '../../../src/di';
 import InputFileCollection from '../../../src/input/InputFileCollection';
 import LoggingClientContext from '../../../src/logging/LoggingClientContext';
@@ -28,7 +30,6 @@ const LOGGING_CONTEXT: LoggingClientContext = Object.freeze({
 });
 
 describe('InitialTestExecutor run', () => {
-
   let strykerSandboxMock: producers.Mock<Sandbox>;
   let sut: InitialTestExecutor;
   let testFrameworkMock: TestFramework | null;
@@ -50,8 +51,8 @@ describe('InitialTestExecutor run', () => {
       .provideValue(coreTokens.loggingContext, LOGGING_CONTEXT)
       .provideValue(coreTokens.testFramework, testFrameworkMock)
       .provideValue(coreTokens.transpiler, transpilerMock as Transpiler)
-      .provideValue(coreTokens.timer, timerMock as unknown as Timer)
-      .provideValue(coreTokens.temporaryDirectory, temporaryDirectoryMock as unknown as TemporaryDirectory)
+      .provideValue(coreTokens.timer, (timerMock as unknown) as Timer)
+      .provideValue(coreTokens.temporaryDirectory, (temporaryDirectoryMock as unknown) as TemporaryDirectory)
       .injectClass(InitialTestExecutor);
   }
 
@@ -65,14 +66,8 @@ describe('InitialTestExecutor run', () => {
     sourceMapperMock = producers.mock(PassThroughSourceMapper);
     sinon.stub(SourceMapper, 'create').returns(sourceMapperMock);
     testFrameworkMock = testFramework();
-    coverageAnnotatedFiles = [
-      new File('cov-annotated-transpiled-file-1.js', ''),
-      new File('cov-annotated-transpiled-file-2.js', ''),
-    ];
-    transpiledFiles = [
-      new File('transpiled-file-1.js', ''),
-      new File('transpiled-file-2.js', '')
-    ];
+    coverageAnnotatedFiles = [new File('cov-annotated-transpiled-file-1.js', ''), new File('cov-annotated-transpiled-file-2.js', '')];
+    transpiledFiles = [new File('transpiled-file-1.js', ''), new File('transpiled-file-2.js', '')];
     coverageInstrumenterTranspilerMock.transpile.returns(coverageAnnotatedFiles);
     transpilerMock.transpile.returns(transpiledFiles);
     expectedRunResult = runResult();
@@ -80,7 +75,6 @@ describe('InitialTestExecutor run', () => {
   });
 
   describe('with input files', () => {
-
     beforeEach(() => {
       inputFiles = new InputFileCollection([new File('mutate.js', ''), new File('mutate.spec.js', '')], ['mutate.js']);
     });
@@ -148,7 +142,11 @@ describe('InitialTestExecutor run', () => {
       sut = createSut();
       await sut.run();
       const actualLogMessage: string = testInjector.logger.debug.getCall(0).args[0];
-      const expectedLogMessage = `Transpiled files: ${JSON.stringify(coverageAnnotatedFiles.map(_ => _.name), null, 2)}`;
+      const expectedLogMessage = `Transpiled files: ${JSON.stringify(
+        coverageAnnotatedFiles.map(_ => _.name),
+        null,
+        2
+      )}`;
       expect(actualLogMessage).eq(expectedLogMessage);
     });
 
@@ -165,15 +163,22 @@ describe('InitialTestExecutor run', () => {
       timerMock.elapsedMs.returns(50);
       sut = createSut();
       await sut.run();
-      expect(testInjector.logger.info).to.have.been.calledWith('Initial test run succeeded. Ran %s tests in %s (net %s ms, overhead %s ms).',
-        2, '2 seconds', 20, 30);
+      expect(testInjector.logger.info).to.have.been.calledWith(
+        'Initial test run succeeded. Ran %s tests in %s (net %s ms, overhead %s ms).',
+        2,
+        '2 seconds',
+        20,
+        30
+      );
     });
 
     it('should log when there were no tests', async () => {
       while (expectedRunResult.tests.pop());
       sut = createSut();
       await sut.run();
-      expect(testInjector.logger.warn).to.have.been.calledWith('No tests were executed. Stryker will exit prematurely. Please check your configuration.');
+      expect(testInjector.logger.warn).to.have.been.calledWith(
+        'No tests were executed. Stryker will exit prematurely. Please check your configuration.'
+      );
     });
 
     it('should pass through any rejections', async () => {
@@ -207,7 +212,9 @@ describe('InitialTestExecutor run', () => {
       sinon.stub(coverageHooks, 'coveragePerTestHooks').returns('test hook foobar');
       sut = createSut();
       await sut.run();
-      expect(testInjector.logger.warn).calledWith('Cannot measure coverage results per test, there is no testFramework and thus no way of executing code right before and after each test.');
+      expect(testInjector.logger.warn).calledWith(
+        'Cannot measure coverage results per test, there is no testFramework and thus no way of executing code right before and after each test.'
+      );
     });
 
     describe('and run has test failures', () => {
@@ -222,7 +229,9 @@ describe('InitialTestExecutor run', () => {
       it('should have logged the errors', async () => {
         sut = createSut();
         await expect(sut.run()).rejected;
-        expect(testInjector.logger.error).calledWith(`One or more tests failed in the initial test run:${EOL}\texample test${EOL}\t\texpected error${EOL}\t2nd example test`);
+        expect(testInjector.logger.error).calledWith(
+          `One or more tests failed in the initial test run:${EOL}\texample test${EOL}\t\texpected error${EOL}\t2nd example test`
+        );
       });
       it('should reject with correct message', async () => {
         sut = createSut();
@@ -231,7 +240,6 @@ describe('InitialTestExecutor run', () => {
     });
 
     describe('and run has some errors', () => {
-
       beforeEach(() => {
         expectedRunResult.status = RunStatus.Error;
         expectedRunResult.errorMessages = ['foobar', 'example'];
@@ -251,15 +259,15 @@ describe('InitialTestExecutor run', () => {
     describe('and run timed out', () => {
       beforeEach(() => {
         expectedRunResult.status = RunStatus.Timeout;
-        expectedRunResult.tests = [
-          testResult({ name: 'foobar test' }),
-          testResult({ name: 'example test', status: TestStatus.Failed })];
+        expectedRunResult.tests = [testResult({ name: 'foobar test' }), testResult({ name: 'example test', status: TestStatus.Failed })];
       });
 
       it('should have logged the timeout', async () => {
         sut = createSut();
         await expect(sut.run()).rejected;
-        expect(testInjector.logger.error).calledWith(`Initial test run timed out! Ran following tests before timeout:${EOL}\tfoobar test (Success)${EOL}\texample test (Failed)`);
+        expect(testInjector.logger.error).calledWith(
+          `Initial test run timed out! Ran following tests before timeout:${EOL}\tfoobar test (Success)${EOL}\texample test (Failed)`
+        );
       });
 
       it('should reject with correct message', async () => {

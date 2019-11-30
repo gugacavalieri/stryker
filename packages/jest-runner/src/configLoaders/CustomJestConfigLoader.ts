@@ -1,6 +1,8 @@
 import fs = require('fs');
-import jest from 'jest';
 import path from 'path';
+
+import jest from 'jest';
+
 import JestConfigLoader from './JestConfigLoader';
 
 /**
@@ -21,12 +23,16 @@ export default class CustomJestConfigLoader implements JestConfigLoader {
   private readConfigFromJestConfigFile() {
     try {
       return this._loader(path.join(this._projectRoot, 'jest.config.js'));
-    } catch { /* Don't return anything (implicitly return undefined) */ }
+    } catch {
+      /* Don't return anything (implicitly return undefined) */
+    }
   }
 
   private readConfigFromPackageJson() {
     try {
       return JSON.parse(fs.readFileSync(path.join(this._projectRoot, 'package.json'), 'utf8')).jest;
-    } catch { /* Don't return anything (implicitly return undefined) */ }
+    } catch {
+      /* Don't return anything (implicitly return undefined) */
+    }
   }
 }

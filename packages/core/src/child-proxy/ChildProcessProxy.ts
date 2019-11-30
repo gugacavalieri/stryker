@@ -1,14 +1,17 @@
+import { ChildProcess, fork } from 'child_process';
+import * as os from 'os';
+
 import { File, StrykerOptions } from '@stryker-mutator/api/core';
 import { OptionsContext } from '@stryker-mutator/api/plugin';
 import { isErrnoException } from '@stryker-mutator/util';
-import { ChildProcess, fork } from 'child_process';
 import { getLogger } from 'log4js';
-import * as os from 'os';
 import { Disposable, InjectableClass, InjectionToken } from 'typed-inject';
+
 import LoggingClientContext from '../logging/LoggingClientContext';
 import { deserialize, kill, padLeft, serialize } from '../utils/objectUtils';
 import StringBuilder from '../utils/StringBuilder';
 import { ExpirableTask, Task } from '../utils/Task';
+
 import ChildProcessCrashedError from './ChildProcessCrashedError';
 import { autoStart, ParentMessage, ParentMessageKind, WorkerMessage, WorkerMessageKind } from './messageProtocol';
 import OutOfMemoryError from './OutOfMemoryError';
@@ -30,15 +33,22 @@ export default class ChildProcessProxy<T> implements Disposable {
 
   private readonly worker: ChildProcess;
   private readonly initTask: Task;
-  private disposeTask: ExpirableTask<void> | undefined;
+  private disposeTask: ExpirableTask | undefined;
   private currentError: ChildProcessCrashedError | undefined;
-  private readonly workerTasks: Task<void>[] = [];
+  private readonly workerTasks: Task[] = [];
   private readonly log = getLogger(ChildProcessProxy.name);
   private readonly stdoutBuilder = new StringBuilder();
   private readonly stderrBuilder = new StringBuilder();
   private isDisposed = false;
 
-  private constructor(requirePath: string, requireName: string, loggingContext: LoggingClientContext, options: StrykerOptions, additionalInjectableValues: unknown, workingDirectory: string) {
+  private constructor(
+    requirePath: string,
+    requireName: string,
+    loggingContext: LoggingClientContext,
+    options: StrykerOptions,
+    additionalInjectableValues: unknown,
+    workingDirectory: string
+  ) {
     this.worker = fork(require.resolve('./ChildProcessProxyWorker'), [autoStart], { silent: true, execArgv: [] });
     this.initTask = new Task();
     this.log.debug('Starting %s in child process %s', requirePath, this.worker.pid);
@@ -62,14 +72,14 @@ export default class ChildProcessProxy<T> implements Disposable {
   /**
    * @description Creates a proxy where each function of the object created using the constructorFunction arg is ran inside of a child process
    */
-  public static create<TAdditionalContext, R, Tokens extends InjectionToken<OptionsContext & TAdditionalContext>[]>(
+  public static create<TAdditionalContext, R, Tokens extends Array<InjectionToken<OptionsContext & TAdditionalContext>>>(
     requirePath: string,
     loggingContext: LoggingClientContext,
     options: StrykerOptions,
     additionalInjectableValues: TAdditionalContext,
     workingDirectory: string,
-    InjectableClass: InjectableClass<TAdditionalContext & OptionsContext, R, Tokens>):
-    ChildProcessProxy<R> {
+    InjectableClass: InjectableClass<TAdditionalContext & OptionsContext, R, Tokens>
+  ): ChildProcessProxy<R> {
     return new ChildProcessProxy(requirePath, InjectableClass.name, loggingContext, options, additionalInjectableValues, workingDirectory);
   }
 
@@ -158,9 +168,7 @@ export default class ChildProcessProxy<T> implements Disposable {
   }
 
   private reportError(error: Error) {
-    this.workerTasks
-      .filter(task => !task.isCompleted)
-      .forEach(task => task.reject(error));
+    this.workerTasks.filter(task => !task.isCompleted).forEach(task => task.reject(error));
   }
 
   private readonly handleUnexpectedExit = (code: number, signal: string) => {
@@ -172,14 +180,19 @@ export default class ChildProcessProxy<T> implements Disposable {
       this.log.warn(`Child process [pid ${this.currentError.pid}] ran out of memory. Stdout and stderr are logged on debug level.`);
       this.log.debug(stdoutAndStderr());
     } else {
-      this.currentError = new ChildProcessCrashedError(this.worker.pid, `Child process [pid ${this.worker.pid}] exited unexpectedly with exit code ${code} (${signal || 'without signal'}). ${stdoutAndStderr()}`, code, signal);
+      this.currentError = new ChildProcessCrashedError(
+        this.worker.pid,
+        `Child process [pid ${this.worker.pid}] exited unexpectedly with exit code ${code} (${signal || 'without signal'}). ${stdoutAndStderr()}`,
+        code,
+        signal
+      );
       this.log.warn(this.currentError.message, this.currentError);
     }
 
     this.reportError(this.currentError);
 
     function processOutOfMemory() {
-      return output.indexOf('JavaScript heap out of memory') >= 0;
+      return output.includes('JavaScript heap out of memory');
     }
 
     function stdoutAndStderr() {
@@ -189,16 +202,18 @@ export default class ChildProcessProxy<T> implements Disposable {
         return 'Stdout and stderr were empty.';
       }
     }
-  }
+  };
 
   private readonly handleError = (error: Error) => {
     if (this.innerProcessIsCrashed(error)) {
       this.log.warn(`Child process [pid ${this.worker.pid}] has crashed. See other warning messages for more info.`, error);
-      this.reportError(new ChildProcessCrashedError(this.worker.pid, `Child process [pid ${this.worker.pid}] has crashed`, undefined, undefined, error));
+      this.reportError(
+        new ChildProcessCrashedError(this.worker.pid, `Child process [pid ${this.worker.pid}] has crashed`, undefined, undefined, error)
+      );
     } else {
       this.reportError(error);
     }
-  }
+  };
 
   private innerProcessIsCrashed(error: Error) {
     return isErrnoException(error) && (error.code === BROKEN_PIPE_ERROR_CODE || error.code === IPC_CHANNEL_CLOSED_ERROR_CODE);
@@ -214,8 +229,8 @@ export default class ChildProcessProxy<T> implements Disposable {
       try {
         await this.disposeTask.promise;
       } finally {
-          this.log.debug('Kill %s', this.worker.pid);
-          await kill(this.worker.pid);
+        this.log.debug('Kill %s', this.worker.pid);
+        await kill(this.worker.pid);
       }
     }
   }

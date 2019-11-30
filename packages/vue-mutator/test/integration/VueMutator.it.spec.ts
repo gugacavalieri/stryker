@@ -5,16 +5,15 @@ import { strykerPlugins as javascriptMutatorStrykerPlugins } from '@stryker-muta
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { strykerPlugins as typescriptMutatorStrykerPlugins } from '@stryker-mutator/typescript';
 import { expect } from 'chai';
+
 import { strykerPlugins } from '../../src/index';
 
 const javascriptMutatorPlugin = javascriptMutatorStrykerPlugins.find(plugin => plugin.kind === PluginKind.Mutator);
 const typescriptMutatorPlugin = typescriptMutatorStrykerPlugins.find(plugin => plugin.kind === PluginKind.Mutator);
 
 describe('VueMutator', () => {
-
   function createSut(): Mutator {
-    return testInjector.injector
-      .injectFunction(strykerPlugins[0].factory);
+    return testInjector.injector.injectFunction(strykerPlugins[0].factory);
   }
 
   describe('JavaScript project', () => {
@@ -54,8 +53,9 @@ describe('VueMutator', () => {
       const mutants = sut.mutate(files);
 
       expect(mutants.filter(m => m.mutatorName === 'StringLiteral').length).to.equal(2);
-      expect(mutants.filter(m => m.mutatorName === 'Block').length).to.equal(3);
-      expect(mutants.filter(m => m.mutatorName === 'BinaryExpression').length).to.equal(3);
+      expect(mutants.filter(m => m.mutatorName === 'BlockStatement').length).to.equal(3);
+      expect(mutants.filter(m => m.mutatorName === 'EqualityOperator').length).to.equal(2);
+      expect(mutants.filter(m => m.mutatorName === 'ArithmeticOperator').length).to.equal(1);
     });
   });
 
@@ -94,8 +94,9 @@ describe('VueMutator', () => {
       const mutants = sut.mutate(files);
 
       expect(mutants.filter(m => m.mutatorName === 'StringLiteral').length).to.equal(1);
-      expect(mutants.filter(m => m.mutatorName === 'Block').length).to.equal(3);
-      expect(mutants.filter(m => m.mutatorName === 'BinaryExpression').length).to.equal(3);
+      expect(mutants.filter(m => m.mutatorName === 'BlockStatement').length).to.equal(3);
+      expect(mutants.filter(m => m.mutatorName === 'EqualityOperator').length).to.equal(2);
+      expect(mutants.filter(m => m.mutatorName === 'ArithmeticOperator').length).to.equal(1);
     });
   });
 });

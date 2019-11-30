@@ -2,23 +2,24 @@ import { StrykerOptions } from '@stryker-mutator/api/core';
 import { Logger } from '@stryker-mutator/api/logging';
 import { commonTokens, PluginKind, tokens } from '@stryker-mutator/api/plugin';
 import { TestFramework } from '@stryker-mutator/api/test_framework';
+
 import { coreTokens } from './di';
 import { PluginCreator } from './di/PluginCreator';
 
 export default class TestFrameworkOrchestrator {
-
-  public static inject = tokens(
-    commonTokens.logger,
-    commonTokens.options,
-    coreTokens.pluginCreatorTestFramework);
+  public static inject = tokens(commonTokens.logger, commonTokens.options, coreTokens.pluginCreatorTestFramework);
   constructor(
     private readonly log: Logger,
     private readonly options: StrykerOptions,
-    private readonly pluginCreator: PluginCreator<PluginKind.TestFramework>) { }
+    private readonly pluginCreator: PluginCreator<PluginKind.TestFramework>
+  ) {}
 
   public determineTestFramework(): TestFramework | null {
     if (this.options.coverageAnalysis !== 'perTest') {
-      this.log.debug('The `coverageAnalysis` setting is "%s", not hooking into the test framework to achieve performance benefits.', this.options.coverageAnalysis);
+      this.log.debug(
+        'The `coverageAnalysis` setting is "%s", not hooking into the test framework to achieve performance benefits.',
+        this.options.coverageAnalysis
+      );
       return null;
     } else {
       return this.determineFrameworkWithCoverageAnalysis();
@@ -39,5 +40,4 @@ export default class TestFrameworkOrchestrator {
     }
     return testFramework;
   }
-
 }

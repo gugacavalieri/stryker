@@ -1,10 +1,10 @@
 import { Logger } from '@stryker-mutator/api/logging';
 import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import jest from 'jest';
+
 import JestTestAdapter from './JestTestAdapter';
 
 export default class JestPromiseTestAdapter implements JestTestAdapter {
-
   public static inject = tokens(commonTokens.logger);
   constructor(private readonly log: Logger) {}
 
@@ -16,11 +16,14 @@ export default class JestPromiseTestAdapter implements JestTestAdapter {
       this.log.trace(`Only running tests related to ${fileNameUnderTest}`);
     }
 
-    return jest.runCLI({
-      ...(fileNameUnderTest && { _: [fileNameUnderTest], findRelatedTests: true}),
-      config,
-      runInBand: true,
-      silent: true
-    }, [projectRoot]);
+    return jest.runCLI(
+      {
+        ...(fileNameUnderTest && { _: [fileNameUnderTest], findRelatedTests: true }),
+        config,
+        runInBand: true,
+        silent: true
+      },
+      [projectRoot]
+    );
   }
 }

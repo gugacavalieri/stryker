@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import Timer from '../../../src/utils/Timer';
 
 describe('Timer', () => {
@@ -17,8 +18,7 @@ describe('Timer', () => {
     describe(`after ${expectedTimeLabel}`, () => {
       beforeEach(() => clock.tick(elapsedMs));
 
-      it(`should show "${expectedTimeLabel}" when humanReadableElapsed()`,
-        () => expect(sut.humanReadableElapsed()).to.be.eq(expectedTimeLabel));
+      it(`should show "${expectedTimeLabel}" when humanReadableElapsed()`, () => expect(sut.humanReadableElapsed()).to.be.eq(expectedTimeLabel));
     });
   };
 

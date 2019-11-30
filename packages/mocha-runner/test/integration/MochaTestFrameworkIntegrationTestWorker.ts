@@ -1,7 +1,9 @@
+import * as path from 'path';
+
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { RunResult } from '@stryker-mutator/api/test_runner';
 import { testInjector } from '@stryker-mutator/test-helpers';
-import * as path from 'path';
+
 import MochaTestRunner from '../../src/MochaTestRunner';
 
 export const AUTO_START_ARGUMENT = '2e164669-acf1-461c-9c05-2be139614de2';
@@ -20,9 +22,7 @@ export default class MochaTestFrameworkIntegrationTestWorker {
     testInjector.options.mochaOptions = {
       file: [],
       ignore: [],
-      spec: [
-        path.resolve(__dirname, '..', '..', 'testResources', 'sampleProject', 'MyMathSpec.js')
-      ],
+      spec: [path.resolve(__dirname, '..', '..', 'testResources', 'sampleProject', 'MyMathSpec.js')]
     };
     this.sut = testInjector.injector
       .provideValue(commonTokens.sandboxFileNames, [
@@ -41,7 +41,8 @@ export default class MochaTestFrameworkIntegrationTestWorker {
 
   public listenForParentProcess() {
     process.on('message', (message: ChildMessage) => {
-      this.sut.run({ testHooks: message.testHooks })
+      this.sut
+        .run({ testHooks: message.testHooks })
         .then(result => this.send(result))
         .catch(error => this.send(error));
     });
@@ -59,6 +60,6 @@ export default class MochaTestFrameworkIntegrationTestWorker {
   }
 }
 
-if (process.argv.indexOf(AUTO_START_ARGUMENT) >= 0) {
+if (process.argv.includes(AUTO_START_ARGUMENT)) {
   new MochaTestFrameworkIntegrationTestWorker();
 }

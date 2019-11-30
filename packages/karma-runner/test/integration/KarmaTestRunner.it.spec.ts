@@ -1,10 +1,12 @@
+import { promisify } from 'util';
+import * as http from 'http';
+
 import { CoverageCollection, RunResult, RunStatus, TestStatus } from '@stryker-mutator/api/test_runner';
 import JasmineTestFramework from '@stryker-mutator/jasmine-framework/src/JasmineTestFramework';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import http = require('http');
 import { FilePattern } from 'karma';
-import { promisify } from 'util';
+
 import KarmaTestRunner from '../../src/KarmaTestRunner';
 import { expectTestResults } from '../helpers/assertions';
 
@@ -31,7 +33,6 @@ function createSut() {
 }
 
 describe('KarmaTestRunner', () => {
-
   let sut: KarmaTestRunner;
 
   const expectToHaveSuccessfulTests = (result: RunResult, n: number) => {
@@ -47,14 +48,9 @@ describe('KarmaTestRunner', () => {
   };
 
   describe('when all tests succeed', () => {
-
     describe('with simple add function to test', () => {
-
       before(() => {
-        setOptions([
-          'testResources/sampleProject/src/Add.js',
-          'testResources/sampleProject/test/AddSpec.js'
-        ]);
+        setOptions(['testResources/sampleProject/src/Add.js', 'testResources/sampleProject/test/AddSpec.js']);
         sut = createSut();
         return sut.init();
       });
@@ -68,14 +64,16 @@ describe('KarmaTestRunner', () => {
         });
       });
 
-      it('should be able to run twice in quick succession',
-        () => expect(sut.run({}).then(() => sut.run({}))).to.eventually.have.property('status', RunStatus.Complete));
+      it('should be able to run twice in quick succession', () =>
+        expect(sut.run({}).then(() => sut.run({}))).to.eventually.have.property('status', RunStatus.Complete));
 
       it('should be able to filter tests', async () => {
-        const testHooks = wrapInClosure(new JasmineTestFramework().filter([
-          { id: 0, name: 'Add should be able to add two numbers' },
-          { id: 3, name: 'Add should be able to recognize a negative number' }
-        ]));
+        const testHooks = wrapInClosure(
+          new JasmineTestFramework().filter([
+            { id: 0, name: 'Add should be able to add two numbers' },
+            { id: 3, name: 'Add should be able to recognize a negative number' }
+          ])
+        );
         const result = await sut.run({ testHooks });
         expectTestResults(result, [
           { name: 'Add should be able to add two numbers', status: TestStatus.Success },
@@ -110,7 +108,6 @@ describe('KarmaTestRunner', () => {
   });
 
   describe('when an error occurs while running tests', () => {
-
     before(() => {
       setOptions([
         'testResources/sampleProject/src/Add.js',
@@ -125,16 +122,13 @@ describe('KarmaTestRunner', () => {
       const runResult = await sut.run({});
       expect(RunStatus[runResult.status]).to.be.eq(RunStatus[RunStatus.Error]);
       expect((runResult.errorMessages as string[]).length).to.equal(1);
-      expect((runResult.errorMessages as string[])[0]).include('ReferenceError: Can\'t find variable: someGlobalVariableThatIsNotDeclared');
+      expect((runResult.errorMessages as string[])[0]).include("ReferenceError: Can't find variable: someGlobalVariableThatIsNotDeclared");
     });
   });
 
   describe('when no error occurred and no test is performed', () => {
     before(() => {
-      setOptions([
-        'testResources/sampleProject/src/Add.js',
-        'testResources/sampleProject/test/EmptySpec.js'
-      ]);
+      setOptions(['testResources/sampleProject/src/Add.js', 'testResources/sampleProject/test/EmptySpec.js']);
       sut = createSut();
       return sut.init();
     });
@@ -152,7 +146,6 @@ describe('KarmaTestRunner', () => {
   });
 
   describe('when adding an error file with included: false', () => {
-
     before(() => {
       setOptions([
         { pattern: 'testResources/sampleProject/src/Add.js', included: true },
@@ -172,28 +165,24 @@ describe('KarmaTestRunner', () => {
   });
 
   describe('when coverage data is available', () => {
-
     before(() => {
-      setOptions([
-        'testResources/sampleProject/src-instrumented/Add.js',
-        'testResources/sampleProject/test/AddSpec.js'
-      ], 'all');
+      setOptions(['testResources/sampleProject/src-instrumented/Add.js', 'testResources/sampleProject/test/AddSpec.js'], 'all');
       sut = createSut();
       return sut.init();
     });
 
-    it('should report coverage data', () => expect(sut.run({})).to.eventually.satisfy((runResult: RunResult) => {
-      expect(runResult.coverage).to.be.ok;
-      expect(runResult.status).to.be.eq(RunStatus.Complete);
-      const files = Object.keys(runResult.coverage || {});
-      expect(files).to.have.length(1);
-      const coverageResult = (runResult.coverage as CoverageCollection)[files[0]];
-      expect(coverageResult.s).to.be.ok;
-      return true;
-    }));
+    it('should report coverage data', () =>
+      expect(sut.run({})).to.eventually.satisfy((runResult: RunResult) => {
+        expect(runResult.coverage).to.be.ok;
+        expect(runResult.status).to.be.eq(RunStatus.Complete);
+        const files = Object.keys(runResult.coverage || {});
+        expect(files).to.have.length(1);
+        const coverageResult = (runResult.coverage as CoverageCollection)[files[0]];
+        expect(coverageResult.s).to.be.ok;
+        return true;
+      }));
   });
   describe('when specified port is not available', () => {
-
     let dummyServer: DummyServer;
 
     before(async () => {
@@ -223,9 +212,9 @@ class DummyServer {
     this.httpServer = http.createServer();
   }
 
-  get port() {
+  public get port() {
     const address = this.httpServer.address();
-    if (typeof address === 'string') {
+    if (!address || typeof address === 'string') {
       throw new Error(`Address "${address}" was unexpected: https://nodejs.org/dist/latest-v11.x/docs/api/net.html#net_server_address`);
     } else {
       return address.port;

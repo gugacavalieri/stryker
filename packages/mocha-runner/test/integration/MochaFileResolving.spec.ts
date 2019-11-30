@@ -1,13 +1,14 @@
+import * as path from 'path';
+
 import { commonTokens } from '@stryker-mutator/api/plugin';
 import { expect } from 'chai';
-import * as path from 'path';
-import { testInjector } from '../../../test-helpers/src';
+import { testInjector } from '@stryker-mutator/test-helpers';
+
 import MochaOptionsLoader from '../../src/MochaOptionsLoader';
 import MochaTestRunner from '../../src/MochaTestRunner';
 import { mochaOptionsKey } from '../../src/utils';
 
 describe('Mocha 6 file resolving integration', () => {
-
   const cwd = process.cwd();
 
   afterEach(() => {
@@ -29,14 +30,11 @@ describe('Mocha 6 file resolving integration', () => {
   });
 
   function createConfigLoader() {
-    return testInjector.injector
-      .injectClass(MochaOptionsLoader);
+    return testInjector.injector.injectClass(MochaOptionsLoader);
   }
 
   function createTestRunner() {
-    return testInjector.injector
-      .provideValue(commonTokens.sandboxFileNames, [])
-      .injectClass(MochaTestRunner);
+    return testInjector.injector.provideValue(commonTokens.sandboxFileNames, []).injectClass(MochaTestRunner);
   }
 
   function resolveTestDir(fileName = '.') {

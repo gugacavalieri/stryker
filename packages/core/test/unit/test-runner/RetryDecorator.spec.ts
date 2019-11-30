@@ -2,6 +2,7 @@ import { Logger } from '@stryker-mutator/api/logging';
 import { RunStatus } from '@stryker-mutator/api/test_runner';
 import { errorToString } from '@stryker-mutator/util';
 import { expect } from 'chai';
+
 import ChildProcessCrashedError from '../../../src/child-proxy/ChildProcessCrashedError';
 import OutOfMemoryError from '../../../src/child-proxy/OutOfMemoryError';
 import RetryDecorator from '../../../src/test-runner/RetryDecorator';
@@ -60,7 +61,10 @@ describe('RetryDecorator', () => {
       testRunner1.run.rejects(new OutOfMemoryError(123, 123));
       testRunner2.run.resolves(expectedResult);
       await expect(sut.run(options)).to.eventually.eq(expectedResult);
-      expect(logMock.info).calledWith('Test runner process [%s] ran out of memory. You probably have a memory leak in your tests. Don\'t worry, Stryker will restart the process, but you might want to investigate this later, because this decreases performance.', 123);
+      expect(logMock.info).calledWith(
+        "Test runner process [%s] ran out of memory. You probably have a memory leak in your tests. Don't worry, Stryker will restart the process, but you might want to investigate this later, because this decreases performance.",
+        123
+      );
     });
 
     it('should dispose a test runner when it rejected, before creating a new one', async () => {
@@ -78,8 +82,9 @@ describe('RetryDecorator', () => {
 
       const runResult = await sut.run(options);
       expect(runResult.status).to.be.eq(RunStatus.Error);
-      expect(runResult.errorMessages).to.be.deep.eq(['Test runner crashed. Tried twice to restart it without any luck. Last time the error message was: '
-        + errorToString(finalError)]);
+      expect(runResult.errorMessages).to.be.deep.eq([
+        `Test runner crashed. Tried twice to restart it without any luck. Last time the error message was: ${errorToString(finalError)}`
+      ]);
       expect(availableTestRunners).to.have.lengthOf(0);
     });
   });

@@ -1,9 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { TestSelection } from '@stryker-mutator/api/test_framework';
 import { expect } from 'chai';
 import * as execa from 'execa';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as rimraf from 'rimraf';
+
 import MochaTestFramework from '../../src/MochaTestFramework';
 
 interface MochaTestRunResult {
@@ -20,7 +22,6 @@ interface MochaTest {
 
 // See https://github.com/stryker-mutator/stryker/issues/249
 describe('Selecting tests with nested suites', () => {
-
   let sut: MochaTestFramework;
   const nestedSuiteFile = path.resolve(__dirname, '..', '..', 'testResources', 'nested-suite.js');
   const selectTestFile = path.join(__dirname, '..', '..', 'testResources', '__filterSpecs.js');

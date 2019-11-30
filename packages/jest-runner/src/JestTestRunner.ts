@@ -3,6 +3,7 @@ import { Logger } from '@stryker-mutator/api/logging';
 import { commonTokens, Injector, OptionsContext, tokens } from '@stryker-mutator/api/plugin';
 import { RunOptions, RunResult, RunStatus, TestResult, TestRunner, TestStatus } from '@stryker-mutator/api/test_runner';
 import jest from 'jest';
+
 import { JEST_VERSION_TOKEN, jestTestAdapterFactory } from './jestTestAdapters';
 import JestTestAdapter from './jestTestAdapters/JestTestAdapter';
 
@@ -24,7 +25,12 @@ export default class JestTestRunner implements TestRunner {
   private readonly enableFindRelatedTests: boolean;
 
   public static inject = tokens(commonTokens.logger, commonTokens.options, PROCESS_ENV_TOKEN, JEST_TEST_ADAPTER_TOKEN);
-  public constructor(private readonly log: Logger, options: StrykerOptions, private readonly processEnvRef: NodeJS.ProcessEnv, private readonly jestTestAdapter: JestTestAdapter) {
+  constructor(
+    private readonly log: Logger,
+    options: StrykerOptions,
+    private readonly processEnvRef: NodeJS.ProcessEnv,
+    private readonly jestTestAdapter: JestTestAdapter
+  ) {
     // Get jest configuration from stryker options and assign it to jestConfig
     this.jestConfig = options.jest.config;
 
@@ -37,7 +43,9 @@ export default class JestTestRunner implements TestRunner {
     if (this.enableFindRelatedTests) {
       this.log.debug('Running jest with --findRelatedTests flag. Set jest.enableFindRelatedTests to false to run all tests on every mutant.');
     } else {
-      this.log.debug('Running jest without --findRelatedTests flag. Set jest.enableFindRelatedTests to true to run only relevant tests on every mutant.');
+      this.log.debug(
+        'Running jest without --findRelatedTests flag. Set jest.enableFindRelatedTests to true to run only relevant tests on every mutant.'
+      );
     }
 
     // basePath will be used in future releases of Stryker as a way to define the project root
@@ -49,14 +57,20 @@ export default class JestTestRunner implements TestRunner {
 
   public async run(options: RunOptions): Promise<RunResult> {
     this.setNodeEnv();
-    const { results } = await this.jestTestAdapter.run(this.jestConfig, process.cwd(), this.enableFindRelatedTests ? options.mutatedFileName : undefined);
+    const { results } = await this.jestTestAdapter.run(
+      this.jestConfig,
+      process.cwd(),
+      this.enableFindRelatedTests ? options.mutatedFileName : undefined
+    );
 
     // Get the non-empty errorMessages from the jest RunResult, it's safe to cast to Array<string> here because we filter the empty error messages
-    const errorMessages = results.testResults.map((testSuite: jest.TestResult) => testSuite.failureMessage).filter(errorMessage => (errorMessage)) as string[];
+    const errorMessages = results.testResults
+      .map((testSuite: jest.TestResult) => testSuite.failureMessage)
+      .filter(errorMessage => errorMessage) as string[];
 
     return {
       errorMessages,
-      status: (results.numRuntimeErrorTestSuites > 0) ? RunStatus.Error : RunStatus.Complete,
+      status: results.numRuntimeErrorTestSuites > 0 ? RunStatus.Error : RunStatus.Complete,
       tests: this.processTestResults(results.testResults)
     };
   }

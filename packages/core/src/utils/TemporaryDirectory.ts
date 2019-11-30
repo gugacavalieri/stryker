@@ -1,10 +1,12 @@
+import * as path from 'path';
+
 import { StrykerOptions } from '@stryker-mutator/api/core';
 import { Logger } from '@stryker-mutator/api/logging';
 import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import { fsAsPromised } from '@stryker-mutator/util';
 import * as mkdirp from 'mkdirp';
-import * as path from 'path';
 import { Disposable } from 'typed-inject';
+
 import { deleteDir } from './fileUtils';
 
 export class TemporaryDirectory implements Disposable {
@@ -64,11 +66,10 @@ export class TemporaryDirectory implements Disposable {
     if (!this.isInitialized) {
       throw new Error('initialize() was not called!');
     }
-    this.log.debug(`Deleting stryker temp directory %s`, this.temporaryDirectory);
+    this.log.debug('Deleting stryker temp directory %s', this.temporaryDirectory);
     try {
       await deleteDir(this.temporaryDirectory);
-    }
-    catch (e) {
+    } catch (e) {
       return this.log.info(`Failed to delete stryker temp directory ${this.temporaryDirectory}`);
     }
   }
@@ -80,5 +81,4 @@ export class TemporaryDirectory implements Disposable {
   public random(): number {
     return Math.ceil(Math.random() * 10000000);
   }
-
 }

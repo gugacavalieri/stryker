@@ -1,12 +1,15 @@
-import jest from 'jest';
 import * as path from 'path';
+
+import jest from 'jest';
+
 import { createReactTsJestConfig } from '../utils/createReactJestConfig';
+
 import JestConfigLoader from './JestConfigLoader';
 
 export default class ReactScriptsTSJestConfigLoader implements JestConfigLoader {
   private readonly projectRoot: string;
 
-  public constructor(projectRoot: string,  private readonly resolve = require.resolve) {
+  constructor(projectRoot: string, private readonly resolve = require.resolve) {
     this.projectRoot = projectRoot;
   }
 
@@ -22,11 +25,9 @@ export default class ReactScriptsTSJestConfigLoader implements JestConfigLoader 
       jestConfiguration.testEnvironment = 'jsdom';
 
       return jestConfiguration;
-    }
-    catch (e) {
+    } catch (e) {
       if (this.isNodeErrnoException(e) && e.code === 'MODULE_NOT_FOUND') {
-        throw Error('Unable to locate package react-scripts-ts. ' +
-          'This package is required when projectType is set to "react-ts".');
+        throw Error('Unable to locate package react-scripts-ts. ' + 'This package is required when projectType is set to "react-ts".');
       }
       throw e;
     }
@@ -37,10 +38,6 @@ export default class ReactScriptsTSJestConfigLoader implements JestConfigLoader 
   }
 
   private createJestConfig(reactScriptsTsLocation: string): jest.Configuration {
-    return createReactTsJestConfig(
-      (relativePath: string): string => path.join(reactScriptsTsLocation, relativePath),
-      this.projectRoot,
-      false
-    );
+    return createReactTsJestConfig((relativePath: string): string => path.join(reactScriptsTsLocation, relativePath), this.projectRoot, false);
   }
 }

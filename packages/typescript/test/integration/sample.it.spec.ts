@@ -1,17 +1,18 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { Config } from '@stryker-mutator/api/config';
 import { File } from '@stryker-mutator/api/core';
 import { Mutant } from '@stryker-mutator/api/mutant';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import * as fs from 'fs';
-import * as path from 'path';
+
 import { CONFIG_KEY } from '../../src/helpers/keys';
 import TypescriptConfigEditor from '../../src/TypescriptConfigEditor';
 import { typescriptMutatorFactory } from '../../src/TypescriptMutator';
 import TypescriptTranspiler from '../../src/TypescriptTranspiler';
 
 describe('Sample integration', () => {
-
   let config: Config;
   let inputFiles: File[];
 
@@ -19,7 +20,7 @@ describe('Sample integration', () => {
     const configEditor = testInjector.injector.injectClass(TypescriptConfigEditor);
     config = new Config();
     config.set({
-      tsconfigFile: path.resolve(__dirname, '..', '..', 'testResources', 'sampleProject', 'tsconfig.json'),
+      tsconfigFile: path.resolve(__dirname, '..', '..', 'testResources', 'sampleProject', 'tsconfig.json')
     });
     configEditor.edit(config);
     inputFiles = config[CONFIG_KEY].fileNames.map((fileName: string) => new File(fileName, fs.readFileSync(fileName, 'utf8')));
@@ -58,16 +59,16 @@ describe('Sample integration', () => {
     const transpiler = new TypescriptTranspiler(config, /*produceSourceMaps: */ false, () => testInjector.logger);
     transpiler.transpile(inputFiles);
     const mathDotTS = inputFiles.filter(file => file.name.endsWith('math.ts'))[0];
-    const [firstBinaryMutant, stringSubtractMutant] = mutants.filter(m => m.mutatorName === 'BinaryExpression');
-    const correctResult = await transpiler.transpile([mutateFile(mathDotTS, firstBinaryMutant)]);
-    await expect(transpiler.transpile([mutateFile(mathDotTS, stringSubtractMutant)]))
-      .rejectedWith('error TS2362: The left-hand side of an arithmetic operation must be of type \'any\', \'number\', \'bigint\' or an enum type.');
+    const [firstArithmeticOperatorMutant, stringSubtractMutant] = mutants.filter(m => m.mutatorName === 'ArithmeticOperator');
+    const correctResult = await transpiler.transpile([mutateFile(mathDotTS, firstArithmeticOperatorMutant)]);
+    await expect(transpiler.transpile([mutateFile(mathDotTS, stringSubtractMutant)])).rejectedWith(
+      "error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type."
+    );
     expect(correctResult).lengthOf(1);
     expect(path.resolve(correctResult[0].name)).eq(path.resolve(path.dirname(mathDotTS.name), 'math.js'));
   });
 
   function mutateFile(file: File, mutant: Mutant): File {
-    return new File(file.name,
-      file.content.slice(0, mutant.range[0]) + mutant.replacement + file.content.slice(mutant.range[1]));
+    return new File(file.name, `${file.content.slice(0, mutant.range[0])}${mutant.replacement}${file.content.slice(mutant.range[1])}`);
   }
 });

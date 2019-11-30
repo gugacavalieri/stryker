@@ -2,6 +2,7 @@ import { LoggerFactoryMethod } from '@stryker-mutator/api/logging';
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+
 import * as sut from '../../../src/starters/angularStarter';
 import * as utils from '../../../src/utils';
 
@@ -19,9 +20,7 @@ describe('angularStarter', () => {
 
   it('should throw an error if angular cli version < 6.1.0', async () => {
     setAngularVersion('6.0.8');
-    await expect(sut.start(getLogger)).rejectedWith(
-      'Your @angular/cli version (6.0.8) is not supported. Please install 6.1.0 or higher'
-    );
+    await expect(sut.start(getLogger)).rejectedWith('Your @angular/cli version (6.0.8) is not supported. Please install 6.1.0 or higher');
   });
 
   it('should support version 6.1.0 and up inc release candidates', async () => {
@@ -44,13 +43,7 @@ describe('angularStarter', () => {
     setAngularVersion();
     await sut.start(getLogger);
     expect(cliStub).calledWith({
-      cliArgs: [
-        'test',
-        '--progress=false',
-        `--karma-config=${require.resolve(
-          '../../../src/starters/stryker-karma.conf'
-        )}`
-      ],
+      cliArgs: ['test', '--progress=false', `--karma-config=${require.resolve('../../../src/starters/stryker-karma.conf')}`],
       inputStream: process.stdin,
       outputStream: process.stdout
     });
@@ -94,12 +87,10 @@ describe('angularStarter', () => {
           '--project': '@ns/myproj'
         }
       })
-    ).rejectedWith('Don\'t prefix arguments with dashes (\'-\'). Stryker will do this automatically. Problematic arguments are --project');
+    ).rejectedWith("Don't prefix arguments with dashes ('-'). Stryker will do this automatically. Problematic arguments are --project");
   });
 
   function setAngularVersion(version = '100') {
-    requireModuleStub
-      .withArgs('@angular/cli/package')
-      .returns({ version });
+    requireModuleStub.withArgs('@angular/cli/package').returns({ version });
   }
 });

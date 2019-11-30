@@ -1,7 +1,9 @@
-import { assert, expect } from 'chai';
 import fs from 'fs';
 import path from 'path';
+
+import { assert, expect } from 'chai';
 import sinon from 'sinon';
+
 import CustomJestConfigLoader from '../../../src/configLoaders/CustomJestConfigLoader';
 
 describe(`${CustomJestConfigLoader.name} integration`, () => {
@@ -33,7 +35,10 @@ describe(`${CustomJestConfigLoader.name} integration`, () => {
     requireStub.throws(Error('ENOENT: no such file or directory, open package.json'));
     const config = sut.loadConfig();
 
-    assert(fsStub.readFileSync.calledWith(path.join(projectRoot, 'package.json'), 'utf8'), `readFileSync not called with ${projectRoot}/package.json`);
+    assert(
+      fsStub.readFileSync.calledWith(path.join(projectRoot, 'package.json'), 'utf8'),
+      `readFileSync not called with ${projectRoot}/package.json`
+    );
     expect(config).to.deep.equal({
       exampleProperty: 'examplePackageJsonValue'
     });

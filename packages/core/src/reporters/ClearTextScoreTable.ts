@@ -1,8 +1,10 @@
-import { MutationScoreThresholds } from '@stryker-mutator/api/core';
-import chalk from 'chalk';
-import * as _ from 'lodash';
-import { MetricsResult } from 'mutation-testing-metrics';
 import * as os from 'os';
+
+import { MutationScoreThresholds } from '@stryker-mutator/api/core';
+import { MetricsResult } from 'mutation-testing-metrics';
+
+import chalk = require('chalk');
+import flatMap = require('lodash.flatmap');
 
 const FILES_ROOT_NAME = 'All files';
 
@@ -83,7 +85,6 @@ class FileColumn extends Column {
  * Represents a clear text table for mutation score
  */
 export default class ClearTextScoreTable {
-
   private readonly columns: Column[];
 
   constructor(private readonly metricsResult: MetricsResult, thresholds: MutationScoreThresholds) {
@@ -111,20 +112,15 @@ export default class ClearTextScoreTable {
   }
 
   private drawValues(current = this.metricsResult, ancestorCount = 0): string[] {
-    return [this.drawRow(c => c.drawTableCell(current, ancestorCount))]
-      .concat(_.flatMap(current.childResults, child => this.drawValues(child, ancestorCount + 1)));
+    return [this.drawRow(c => c.drawTableCell(current, ancestorCount))].concat(
+      flatMap(current.childResults, child => this.drawValues(child, ancestorCount + 1))
+    );
   }
 
   /**
    * Returns a string with the score results drawn in a table.
    */
   public draw() {
-    return [
-      this.drawBorder(),
-      this.drawHeader(),
-      this.drawBorder(),
-      this.drawValues().join(os.EOL),
-      this.drawBorder()
-    ].join(os.EOL);
+    return [this.drawBorder(), this.drawHeader(), this.drawBorder(), this.drawValues().join(os.EOL), this.drawBorder()].join(os.EOL);
   }
 }

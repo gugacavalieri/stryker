@@ -1,10 +1,12 @@
 import { File } from '@stryker-mutator/api/core';
 import * as sinon from 'sinon';
 import { Configuration } from 'webpack';
+
 import { StrykerWebpackConfig } from '../../src/WebpackTranspiler';
+
 import { WebpackCompilerMock } from './mockInterfaces';
 
-export type Mock<T> = { [K in keyof T]: sinon.SinonStub; };
+export type Mock<T> = { [K in keyof T]: sinon.SinonStub };
 
 export type Constructor<T> = new (...args: any[]) => T;
 
@@ -44,6 +46,6 @@ export function createWebpackMock(): WebpackCompilerMock {
       context: { fileSystem: {} },
       normal: { fileSystem: {} }
     },
-    run: () => { }
+    run: () => {}
   };
 }

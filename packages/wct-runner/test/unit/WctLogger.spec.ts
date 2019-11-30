@@ -1,6 +1,8 @@
+import { EventEmitter } from 'events';
+
 import { testInjector } from '@stryker-mutator/test-helpers';
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
+
 import WctLogger from '../../src/WctLogger';
 
 describe(WctLogger.name, () => {
@@ -22,7 +24,9 @@ describe(WctLogger.name, () => {
   it('should not forward logging when verbose = false', () => {
     sut = new WctLogger(context, false, testInjector.logger);
     emitAllLogEvents();
-    expect(testInjector.logger.debug).calledWith('Keeping wct quiet. To enable wct logging, set `wct.verbose` to `true` in your Stryker configuration file.');
+    expect(testInjector.logger.debug).calledWith(
+      'Keeping wct quiet. To enable wct logging, set `wct.verbose` to `true` in your Stryker configuration file.'
+    );
     expect(testInjector.logger.info).not.called;
     expect(testInjector.logger.warn).not.called;
     expect(testInjector.logger.error).not.called;

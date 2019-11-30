@@ -1,10 +1,12 @@
-import { Config, ConfigEditor } from '@stryker-mutator/api/config';
-import { Logger } from '@stryker-mutator/api/logging';
-import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+
+import { Config, ConfigEditor } from '@stryker-mutator/api/config';
+import { Logger } from '@stryker-mutator/api/logging';
+import { commonTokens, tokens } from '@stryker-mutator/api/plugin';
 import * as ts from 'typescript';
+
 import { CONFIG_KEY, CONFIG_KEY_FILE } from './helpers/keys';
 import { normalizeFileForTypescript, normalizeFileFromTypescript } from './helpers/tsHelpers';
 
@@ -17,9 +19,8 @@ const COMPILER_OPTIONS_OVERRIDES: Readonly<Partial<ts.CompilerOptions>> = Object
 });
 
 export default class TypescriptConfigEditor implements ConfigEditor {
-
   public static inject = tokens(commonTokens.logger);
-  constructor(private readonly log: Logger) { }
+  constructor(private readonly log: Logger) {}
 
   public edit(strykerConfig: Config, host: ts.ParseConfigHost = ts.sys) {
     this.loadTSConfig(strykerConfig, host);
@@ -34,7 +35,7 @@ export default class TypescriptConfigEditor implements ConfigEditor {
         strykerConfig[CONFIG_KEY] = this.overrideOptions(tsconfig);
       }
     } else {
-      this.log.debug('No \'%s\' specified, not loading any config', CONFIG_KEY_FILE);
+      this.log.debug("No '%s' specified, not loading any config", CONFIG_KEY_FILE);
     }
   }
 
@@ -58,7 +59,8 @@ export default class TypescriptConfigEditor implements ConfigEditor {
         host,
         configFileBase,
         { project: configFileBase },
-        tsconfigFileNameNormalizedForTypeScript);
+        tsconfigFileNameNormalizedForTypeScript
+      );
       if (tsconfig.errors.length) {
         const error = ts.formatDiagnostics(tsconfig.errors, diagnosticsHost(configFileBase));
         this.log.error(`Error while loading tsconfig file '${tsconfigFileName}': ${error}`);

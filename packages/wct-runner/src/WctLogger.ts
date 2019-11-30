@@ -1,8 +1,8 @@
-import { Logger } from '@stryker-mutator/api/logging';
 import { EventEmitter } from 'events';
 
-export default class WctLogger {
+import { Logger } from '@stryker-mutator/api/logging';
 
+export default class WctLogger {
   private readonly logProxy = {
     ['log:debug']: this.log.debug.bind(this.log),
     ['log:error']: this.log.error.bind(this.log),

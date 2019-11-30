@@ -1,28 +1,17 @@
 import * as types from '@babel/types';
+
 import { NodeGenerator } from '../helpers/NodeGenerator';
 import { NodeWithParent } from '../helpers/ParentNode';
+
 import { NodeMutator } from './NodeMutator';
 
 /**
  * Represents a mutator which can remove the conditional clause from statements.
  */
 export default class ConditionalExpressionMutator implements NodeMutator {
-  private readonly validOperators: string[] = [
-    '!=',
-    '!==',
-    '&&',
-    '<',
-    '<=',
-    '==',
-    '===',
-    '>',
-    '>=',
-    '||',
-  ];
+  private readonly validOperators: string[] = ['!=', '!==', '&&', '<', '<=', '==', '===', '>', '>=', '||'];
 
   public name = 'ConditionalExpression';
-
-  constructor() {}
 
   private hasValidParent(node: NodeWithParent): boolean {
     return (
@@ -37,19 +26,34 @@ export default class ConditionalExpressionMutator implements NodeMutator {
   }
 
   private isValidOperator(operator: string): boolean {
-    return this.validOperators.indexOf(operator) !== -1;
+    return this.validOperators.includes(operator);
   }
 
-  public mutate(node: types.Node): types.Node[] | void {
-    if (
-      (types.isBinaryExpression(node) || types.isLogicalExpression(node)) &&
-      this.hasValidParent(node) &&
-      this.isValidOperator(node.operator)
+  public mutate(node: types.Node, copy: <T extends types.Node>(obj: T, deep?: boolean) => T): types.Node[] {
+    if ((types.isBinaryExpression(node) || types.isLogicalExpression(node)) && this.hasValidParent(node) && this.isValidOperator(node.operator)) {
+      return [NodeGenerator.createBooleanLiteralNode(node, false), NodeGenerator.createBooleanLiteralNode(node, true)];
+    } else if (types.isDoWhileStatement(node) || types.isWhileStatement(node)) {
+      return [NodeGenerator.createBooleanLiteralNode(node.test, false)];
+    } else if (types.isForStatement(node)) {
+      if (!node.test) {
+        const mutatedNode = copy(node);
+        mutatedNode.test = NodeGenerator.createBooleanLiteralNode(node, false);
+        return [mutatedNode];
+      } else {
+        return [NodeGenerator.createBooleanLiteralNode(node.test, false)];
+      }
+    } else if (types.isIfStatement(node)) {
+      return [NodeGenerator.createBooleanLiteralNode(node.test, false), NodeGenerator.createBooleanLiteralNode(node.test, true)];
+    } else if (
+      types.isSwitchCase(node) &&
+      // if not a fallthrough case
+      node.consequent.length > 0
     ) {
-      return [
-        NodeGenerator.createBooleanLiteralNode(node, false),
-        NodeGenerator.createBooleanLiteralNode(node, true),
-      ];
+      const mutatedNode = copy(node);
+      mutatedNode.consequent = [];
+      return [mutatedNode];
     }
+
+    return [];
   }
 }
